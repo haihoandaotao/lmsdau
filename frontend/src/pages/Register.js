@@ -70,14 +70,62 @@ const Register = () => {
           alignItems: 'center',
         }}
       >
-        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
-            Đăng ký tài khoản
-          </Typography>
+        <Paper 
+          elevation={6} 
+          sx={{ 
+            p: 5, 
+            width: '100%',
+            borderRadius: 3,
+            border: '1px solid rgba(200, 16, 46, 0.1)',
+          }}
+        >
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Typography 
+              component="h1" 
+              variant="h3" 
+              sx={{ 
+                fontWeight: 800,
+                color: 'primary.main',
+                mb: 1,
+                letterSpacing: '1px',
+                textShadow: '2px 2px 4px rgba(200, 16, 46, 0.1)',
+              }}
+            >
+              LMS-DAU
+            </Typography>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: 'text.primary',
+                fontWeight: 600,
+                mb: 0.5,
+              }}
+            >
+              Đăng ký tài khoản
+            </Typography>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: 'text.secondary',
+              }}
+            >
+              Đại học Đông Á
+            </Typography>
+          </Box>
           
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ 
+                mb: 2,
+                borderRadius: 2,
+              }}
+            >
+              {error}
+            </Alert>
+          )}
           
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
             <TextField
               margin="normal"
               required

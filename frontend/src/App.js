@@ -34,21 +34,163 @@ const ThemeWrapper = ({ children }) => {
   const theme = useMemo(() => createTheme({
     palette: {
       mode,
-      primary: { main: '#1976d2' },
-      secondary: { main: '#dc004e' }
+      primary: {
+        main: '#C8102E', // Đỏ đậm DAU
+        light: '#E63946',
+        dark: '#A00C24',
+        contrastText: '#fff',
+      },
+      secondary: {
+        main: '#2C3E50', // Xám xanh đậm
+        light: '#546E7A',
+        dark: '#1A252F',
+        contrastText: '#fff',
+      },
+      background: {
+        default: mode === 'light' ? '#F8F9FA' : '#121212',
+        paper: mode === 'light' ? '#FFFFFF' : '#1E1E1E',
+      },
+      text: {
+        primary: mode === 'light' ? '#2C3E50' : '#E0E0E0',
+        secondary: mode === 'light' ? '#546E7A' : '#B0B0B0',
+      },
+      error: {
+        main: '#D32F2F',
+      },
+      warning: {
+        main: '#F57C00',
+      },
+      info: {
+        main: '#0288D1',
+      },
+      success: {
+        main: '#388E3C',
+      },
     },
-    shape: { borderRadius: 10 },
+    typography: {
+      fontFamily: '"Roboto", "Segoe UI", "Arial", sans-serif',
+      h1: {
+        fontWeight: 700,
+        fontSize: '2.5rem',
+      },
+      h2: {
+        fontWeight: 700,
+        fontSize: '2rem',
+      },
+      h3: {
+        fontWeight: 600,
+        fontSize: '1.75rem',
+      },
+      h4: {
+        fontWeight: 600,
+        fontSize: '1.5rem',
+      },
+      h5: {
+        fontWeight: 600,
+        fontSize: '1.25rem',
+      },
+      h6: {
+        fontWeight: 600,
+        fontSize: '1rem',
+      },
+      button: {
+        textTransform: 'none',
+        fontWeight: 600,
+      },
+    },
+    shape: {
+      borderRadius: 12,
+    },
+    shadows: [
+      'none',
+      '0px 2px 4px rgba(200, 16, 46, 0.05)',
+      '0px 4px 8px rgba(200, 16, 46, 0.08)',
+      '0px 6px 12px rgba(200, 16, 46, 0.10)',
+      '0px 8px 16px rgba(200, 16, 46, 0.12)',
+      '0px 10px 20px rgba(200, 16, 46, 0.14)',
+      ...Array(19).fill('0px 0px 0px rgba(0,0,0,0)'),
+    ],
     components: {
-      MuiButton: { styleOverrides: { root: { textTransform: 'none', fontWeight: 600 } } },
-      MuiCard: { styleOverrides: { root: { transition: 'box-shadow .3s', '&:hover': { boxShadow: 6 } } } }
-    }
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: 'none',
+            fontWeight: 600,
+            borderRadius: 8,
+            padding: '10px 24px',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: 'translateY(-2px)',
+              boxShadow: '0px 6px 16px rgba(200, 16, 46, 0.2)',
+            },
+          },
+          contained: {
+            boxShadow: 'none',
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            transition: 'all 0.3s ease',
+            border: mode === 'light' ? '1px solid #E0E0E0' : '1px solid #2C2C2C',
+            '&:hover': {
+              boxShadow: '0px 8px 24px rgba(200, 16, 46, 0.12)',
+              transform: 'translateY(-4px)',
+            },
+          },
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            boxShadow: '0px 2px 8px rgba(200, 16, 46, 0.1)',
+          },
+        },
+      },
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            borderRight: mode === 'light' ? '1px solid #E0E0E0' : '1px solid #2C2C2C',
+          },
+        },
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 8,
+            },
+          },
+        },
+      },
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            borderRadius: 6,
+            fontWeight: 500,
+          },
+        },
+      },
+    },
   }), [mode]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div style={{ position: 'fixed', top: 10, right: 10, zIndex: 1300 }}>
-        <IconButton color="inherit" onClick={() => setMode(mode === 'light' ? 'dark' : 'light')} aria-label="toggle dark mode">
+      <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 1300 }}>
+        <IconButton 
+          color="inherit" 
+          onClick={() => setMode(mode === 'light' ? 'dark' : 'light')} 
+          aria-label="toggle dark mode"
+          sx={{
+            backgroundColor: mode === 'light' ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.1)',
+            '&:hover': {
+              backgroundColor: mode === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.2)',
+            },
+          }}
+        >
           {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
         </IconButton>
       </div>

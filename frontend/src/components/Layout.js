@@ -81,19 +81,60 @@ const Layout = () => {
 
   const drawer = (
     <div>
-      <Toolbar sx={{ px: 2 }}>
-        <Box display="flex" alignItems="center">
-          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700 }}>
-            LMS
+      <Toolbar sx={{ px: 2, backgroundColor: theme.palette.primary.main }}>
+        <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
+          <Typography 
+            variant="h5" 
+            noWrap 
+            component="div" 
+            sx={{ 
+              fontWeight: 800,
+              color: '#fff',
+              letterSpacing: '0.5px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
+            }}
+          >
+            LMS-DAU
           </Typography>
         </Box>
       </Toolbar>
       <Divider />
-      <List>
+      <List sx={{ pt: 2 }}>
         {menuItems.map((item) => (
-          <ListItem key={item.text} onClick={() => navigate(item.path)} button sx={{ py: 1, px: 2 }}>
-            <ListItemIcon sx={{ color: theme.palette.primary.main }}>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: 14, fontWeight: 600 }} />
+          <ListItem 
+            key={item.text} 
+            onClick={() => navigate(item.path)} 
+            button 
+            sx={{ 
+              py: 1.5, 
+              px: 3,
+              mx: 1,
+              mb: 0.5,
+              borderRadius: 2,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: theme.palette.primary.main,
+                color: '#fff',
+                transform: 'translateX(4px)',
+                '& .MuiListItemIcon-root': {
+                  color: '#fff',
+                },
+              },
+            }}
+          >
+            <ListItemIcon sx={{ 
+              color: theme.palette.primary.main,
+              minWidth: 40,
+            }}>
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText 
+              primary={item.text} 
+              primaryTypographyProps={{ 
+                fontSize: 15, 
+                fontWeight: 600,
+              }} 
+            />
           </ListItem>
         ))}
       </List>

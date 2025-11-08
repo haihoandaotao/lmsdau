@@ -54,14 +54,63 @@ const Login = () => {
           alignItems: 'center',
         }}
       >
-        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
-            Đăng nhập LMS
-          </Typography>
+        <Paper 
+          elevation={6} 
+          sx={{ 
+            p: 5, 
+            width: '100%',
+            borderRadius: 3,
+            border: '1px solid rgba(200, 16, 46, 0.1)',
+          }}
+        >
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Typography 
+              component="h1" 
+              variant="h3" 
+              sx={{ 
+                fontWeight: 800,
+                color: 'primary.main',
+                mb: 1,
+                letterSpacing: '1px',
+                textShadow: '2px 2px 4px rgba(200, 16, 46, 0.1)',
+              }}
+            >
+              LMS-DAU
+            </Typography>
+            <Typography 
+              variant="subtitle1" 
+              sx={{ 
+                color: 'text.secondary',
+                fontWeight: 500,
+              }}
+            >
+              Hệ thống quản lý học tập
+            </Typography>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: 'text.secondary',
+                mt: 0.5,
+                fontSize: '0.875rem',
+              }}
+            >
+              Đại học Đông Á
+            </Typography>
+          </Box>
           
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ 
+                mb: 2,
+                borderRadius: 2,
+              }}
+            >
+              {error}
+            </Alert>
+          )}
           
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
             <TextField
               margin="normal"
               required
@@ -73,6 +122,11 @@ const Login = () => {
               autoFocus
               value={formData.email}
               onChange={handleChange}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
             />
             <TextField
               margin="normal"
@@ -85,19 +139,44 @@ const Login = () => {
               autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{ 
+                mt: 3, 
+                mb: 2,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 700,
+                borderRadius: 2,
+                boxShadow: '0 4px 12px rgba(200, 16, 46, 0.3)',
+                '&:hover': {
+                  boxShadow: '0 6px 16px rgba(200, 16, 46, 0.4)',
+                },
+              }}
               disabled={loading}
             >
               {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
               <Link to="/register" style={{ textDecoration: 'none' }}>
-                <Typography variant="body2" color="primary">
+                <Typography 
+                  variant="body2" 
+                  color="primary"
+                  sx={{ 
+                    fontWeight: 600,
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
                   Chưa có tài khoản? Đăng ký ngay
                 </Typography>
               </Link>
