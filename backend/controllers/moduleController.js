@@ -22,8 +22,10 @@ exports.getCourseModules = async (req, res) => {
     const isEnrolled = course.enrolledStudents.includes(req.user.id);
     const isInstructor = course.instructor.toString() === req.user.id;
     const isAdmin = req.user.role === 'admin';
+    const isTeacher = req.user.role === 'teacher';
     
-    if (!isEnrolled && !isInstructor && !isAdmin) {
+    // Teachers and admins can manage any course, students need enrollment
+    if (req.user.role === 'student' && !isEnrolled && !isInstructor && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: 'Bạn chưa đăng ký khóa học này'
