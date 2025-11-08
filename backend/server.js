@@ -17,6 +17,7 @@ const assignmentRoutes = require('./routes/assignments');
 const forumRoutes = require('./routes/forum');
 const progressRoutes = require('./routes/progress');
 const notificationRoutes = require('./routes/notifications');
+const seedRoutes = require('./routes/seed');
 
 // Initialize express app
 const app = express();
@@ -37,6 +38,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Static serving for potential future local storage (avoid in Render ephemeral FS)
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+// Serve setup page
+app.use('/setup', express.static(path.join(__dirname, 'public')));
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI, {
@@ -80,6 +83,7 @@ app.use('/api/assignments', assignmentRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/seed', seedRoutes);
 
 // Serve static files from React app in production
 if (process.env.NODE_ENV === 'production') {

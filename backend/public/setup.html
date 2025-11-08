@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMS-DAU - Database Setup</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo h1 {
+      color: #C8102E;
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .logo p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .status {
+      background: #f5f5f5;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .status h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .stat-item:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      color: #666;
+    }
+
+    .stat-value {
+      font-weight: bold;
+      color: #C8102E;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      background: #C8102E;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 15px;
+    }
+
+    button:hover:not(:disabled) {
+      background: #a00d25;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(200, 16, 46, 0.3);
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    button.secondary {
+      background: #2C3E50;
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: #1a252f;
+    }
+
+    .message {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    .message.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      display: block;
+    }
+
+    .credentials {
+      background: #fff9e6;
+      border: 2px solid #ffd700;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .credentials.show {
+      display: block;
+    }
+
+    .credentials h4 {
+      color: #C8102E;
+      margin-bottom: 15px;
+    }
+
+    .credentials .cred-item {
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      font-family: monospace;
+    }
+
+    .credentials .cred-item strong {
+      color: #C8102E;
+    }
+
+    .loader {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #C8102E;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+      display: none;
+    }
+
+    .loader.show {
+      display: block;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .link a {
+      color: #C8102E;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1>🎓 LMS-DAU</h1>
+      <p>Trường Đại học Kiến trúc Đà Nẵng</p>
+      <p style="font-size: 12px; margin-top: 5px;">Database Setup Tool</p>
+    </div>
+
+    <div id="message" class="message"></div>
+    <div class="loader" id="loader"></div>
+
+    <div class="status" id="status">
+      <h3>📊 Trạng thái Database</h3>
+      <div class="stat-item">
+        <span class="stat-label">👥 Người dùng:</span>
+        <span class="stat-value" id="userCount">-</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">📚 Khóa học:</span>
+        <span class="stat-value" id="courseCount">-</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">📝 Bài tập:</span>
+        <span class="stat-value" id="assignmentCount">-</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">💬 Bài viết:</span>
+        <span class="stat-value" id="forumPostCount">-</span>
+      </div>
+    </div>
+
+    <button id="seedBtn" onclick="seedDatabase()">
+      🌱 Tạo dữ liệu mẫu
+    </button>
+
+    <button class="secondary" onclick="checkStatus()">
+      🔄 Kiểm tra trạng thái
+    </button>
+
+    <div class="credentials" id="credentials">
+      <h4>🔑 Tài khoản đăng nhập</h4>
+      <div class="cred-item">
+        <strong>Giáo viên 1:</strong><br>
+        Email: giaovien@dau.edu.vn<br>
+        Password: 123456
+      </div>
+      <div class="cred-item">
+        <strong>Giáo viên 2:</strong><br>
+        Email: gvbinh@dau.edu.vn<br>
+        Password: 123456
+      </div>
+      <div class="cred-item">
+        <strong>Sinh viên:</strong><br>
+        Email: student1@dau.edu.vn (hoặc student2, student3)<br>
+        Password: 123456
+      </div>
+    </div>
+
+    <div class="link">
+      <a href="/" id="loginLink">← Quay về trang đăng nhập</a>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = window.location.origin + '/api';
+
+    function showMessage(text, type = 'info') {
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = text;
+      messageEl.className = `message ${type}`;
+      setTimeout(() => {
+        messageEl.className = 'message';
+      }, 5000);
+    }
+
+    function showLoader(show) {
+      document.getElementById('loader').classList.toggle('show', show);
+    }
+
+    function updateStatus(data) {
+      document.getElementById('userCount').textContent = data.users || 0;
+      document.getElementById('courseCount').textContent = data.courses || 0;
+      document.getElementById('assignmentCount').textContent = data.assignments || 0;
+      document.getElementById('forumPostCount').textContent = data.forumPosts || 0;
+    }
+
+    async function checkStatus() {
+      try {
+        showLoader(true);
+        showMessage('Đang kiểm tra...', 'info');
+        
+        const response = await fetch(`${API_URL}/seed/status`);
+        const data = await response.json();
+        
+        if (data.success) {
+          updateStatus(data.data);
+          showMessage('Đã cập nhật trạng thái!', 'success');
+          
+          if (data.data.users > 0) {
+            document.getElementById('credentials').classList.add('show');
+          }
+        } else {
+          showMessage('Lỗi: ' + data.message, 'error');
+        }
+      } catch (error) {
+        showMessage('Lỗi kết nối: ' + error.message, 'error');
+      } finally {
+        showLoader(false);
+      }
+    }
+
+    async function seedDatabase() {
+      if (!confirm('Bạn có chắc muốn tạo dữ liệu mẫu?\n\nLưu ý: Chỉ thực hiện khi database chưa có dữ liệu.')) {
+        return;
+      }
+
+      try {
+        const seedBtn = document.getElementById('seedBtn');
+        seedBtn.disabled = true;
+        showLoader(true);
+        showMessage('Đang tạo dữ liệu mẫu... Vui lòng đợi...', 'info');
+        
+        const response = await fetch(`${API_URL}/seed/init`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage('✅ Tạo dữ liệu thành công!', 'success');
+          updateStatus(data.data);
+          document.getElementById('credentials').classList.add('show');
+          
+          setTimeout(() => {
+            checkStatus();
+          }, 1000);
+        } else {
+          showMessage('❌ Lỗi: ' + data.message, 'error');
+          seedBtn.disabled = false;
+        }
+      } catch (error) {
+        showMessage('❌ Lỗi kết nối: ' + error.message, 'error');
+        document.getElementById('seedBtn').disabled = false;
+      } finally {
+        showLoader(false);
+      }
+    }
+
+    // Check status on page load
+    window.addEventListener('load', checkStatus);
+  </script>
+</body>
+</html>

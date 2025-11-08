@@ -1,13 +1,15 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // Import models
 const User = require('./models/User');
 const Course = require('./models/Course');
 const Assignment = require('./models/Assignment');
 const ForumPost = require('./models/ForumPost');
-const Progress = require('./models/Progress');
+const ForumComment = require('./models/ForumComment');
+const Submission = require('./models/Submission');
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -53,39 +55,49 @@ const demoUsers = [
 
 const demoCourses = [
   {
+    code: 'IT101',
     title: 'Lập trình Web căn bản',
     description: 'Khóa học giới thiệu về HTML, CSS, JavaScript và các công nghệ web hiện đại. Sinh viên sẽ học cách xây dựng website từ cơ bản đến nâng cao.',
-    category: 'Công nghệ thông tin',
+    department: 'Công nghệ thông tin',
     credits: 3,
-    semester: 'HK1 2024-2025'
+    semester: 'HK1',
+    year: 2024
   },
   {
+    code: 'IT201',
     title: 'Cấu trúc dữ liệu và Giải thuật',
     description: 'Khóa học về các cấu trúc dữ liệu cơ bản (Array, Linked List, Stack, Queue, Tree, Graph) và các thuật toán sắp xếp, tìm kiếm.',
-    category: 'Công nghệ thông tin',
+    department: 'Công nghệ thông tin',
     credits: 4,
-    semester: 'HK1 2024-2025'
+    semester: 'HK1',
+    year: 2024
   },
   {
+    code: 'AR301',
     title: 'Thiết kế Kiến trúc',
     description: 'Nguyên lý thiết kế kiến trúc, phân tích không gian, ánh sáng và vật liệu. Thực hành thiết kế các công trình dân dụng và công cộng.',
-    category: 'Kiến trúc',
+    department: 'Kiến trúc',
     credits: 4,
-    semester: 'HK1 2024-2025'
+    semester: 'HK1',
+    year: 2024
   },
   {
+    code: 'CE201',
     title: 'Quản trị Dự án Xây dựng',
     description: 'Các phương pháp quản lý dự án xây dựng, lập kế hoạch, kiểm soát tiến độ, chi phí và chất lượng công trình.',
-    category: 'Xây dựng',
+    department: 'Xây dựng',
     credits: 3,
-    semester: 'HK1 2024-2025'
+    semester: 'HK1',
+    year: 2024
   },
   {
+    code: 'EN101',
     title: 'Tiếng Anh Chuyên ngành',
     description: 'Phát triển kỹ năng tiếng Anh trong lĩnh vực kiến trúc và xây dựng. Đọc hiểu tài liệu chuyên ngành, viết báo cáo kỹ thuật.',
-    category: 'Ngoại ngữ',
+    department: 'Ngoại ngữ',
     credits: 2,
-    semester: 'HK1 2024-2025'
+    semester: 'HK1',
+    year: 2024
   }
 ];
 
@@ -114,17 +126,17 @@ const demoForumPosts = [
   {
     title: 'Hỏi về cách optimize performance website',
     content: 'Mọi người có kinh nghiệm gì về việc tối ưu tốc độ tải trang web không? Em đang gặp vấn đề với trang web load chậm.',
-    category: 'Thảo luận'
+    category: 'question'
   },
   {
     title: 'Share tài liệu học JavaScript',
     content: 'Em có một số tài liệu hay về JavaScript, chia sẻ cho mọi người cùng học nhé!',
-    category: 'Tài liệu'
+    category: 'resource'
   },
   {
-    title: 'Lỗi khi cài đặt Node.js',
-    content: 'Em cài Node.js bị lỗi "Permission denied". Có bạn nào biết cách fix không ạ?',
-    category: 'Hỏi đáp'
+    title: 'Thảo luận về React vs Vue',
+    content: 'Các bạn nghĩ React hay Vue.js phù hợp hơn cho dự án web nhỏ? Hãy chia sẻ ý kiến nhé.',
+    category: 'discussion'
   }
 ];
 
@@ -136,7 +148,8 @@ async function seedDatabase() {
     await Course.deleteMany({});
     await Assignment.deleteMany({});
     await ForumPost.deleteMany({});
-    await Progress.deleteMany({});
+    await ForumComment.deleteMany({});
+    await Submission.deleteMany({});
     console.log('✅ Data cleared');
 
     // Create users
@@ -198,25 +211,18 @@ async function seedDatabase() {
       console.log(`✅ Created forum post: ${post.title}`);
     }
 
-    // Create progress for students
-    console.log('\n📊 Creating progress records...');
-    for (const student of students) {
-      for (const course of createdCourses.slice(0, 3)) {
-        await Progress.create({
-          student: student._id,
-          course: course._id,
-          completedLessons: Math.floor(Math.random() * 5),
-          grades: [
-            {
-              assignment: 'Midterm',
-              score: Math.floor(Math.random() * 30) + 70,
-              maxScore: 100
-            }
-          ]
-        });
-      }
+    // Create some comments on forum posts
+    console.log('\n� Creating forum comments...');
+    const allPosts = await ForumPost.find();
+    for (const post of allPosts) {
+      const commenter = students[Math.floor(Math.random() * students.length)];
+      await ForumComment.create({
+        post: post._id,
+        author: commenter._id,
+        content: 'Cảm ơn bạn đã chia sẻ! Rất hữu ích.'
+      });
     }
-    console.log('✅ Progress records created');
+    console.log('✅ Forum comments created');
 
     console.log('\n' + '='.repeat(50));
     console.log('🎉 SEED DATA COMPLETED SUCCESSFULLY!');
