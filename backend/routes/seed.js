@@ -456,6 +456,68 @@ router.post('/make-teacher', async (req, res) => {
   }
 });
 
+// @route   POST /api/seed/create-demo-accounts
+// @desc    Create fresh demo accounts (admin + student)
+// @access  Public
+router.post('/create-demo-accounts', async (req, res) => {
+  try {
+    const accounts = [];
+
+    // Create admin if not exists
+    let admin = await User.findOne({ email: 'admin@dau.edu.vn' });
+    if (!admin) {
+      admin = await User.create({
+        name: 'Admin DAU',
+        email: 'admin@dau.edu.vn',
+        password: '123456',
+        role: 'admin',
+        department: 'Ban Giám hiệu'
+      });
+      accounts.push(admin);
+    }
+
+    // Create demo student if not exists
+    let student = await User.findOne({ email: 'demo@dau.edu.vn' });
+    if (!student) {
+      student = await User.create({
+        name: 'Sinh viên Demo',
+        email: 'demo@dau.edu.vn',
+        password: '123456',
+        role: 'student',
+        studentId: 'SV999',
+        major: 'Công nghệ Thông tin'
+      });
+      accounts.push(student);
+    }
+
+    res.json({
+      success: true,
+      message: `Created ${accounts.length} demo accounts!`,
+      accounts: [
+        {
+          role: 'admin',
+          email: 'admin@dau.edu.vn',
+          password: '123456',
+          status: admin ? 'created' : 'already exists'
+        },
+        {
+          role: 'student',
+          email: 'demo@dau.edu.vn',
+          password: '123456',
+          status: student ? 'created' : 'already exists'
+        }
+      ]
+    });
+  } catch (error) {
+    console.error('❌ Error creating demo accounts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating demo accounts',
+      error: error.message
+    });
+  }
+});
+
 // @route   POST /api/seed/fix-teacher
 // @desc    Delete and recreate teacher account with correct password
 // @access  Public
