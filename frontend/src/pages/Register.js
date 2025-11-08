@@ -80,6 +80,24 @@ const Register = () => {
           }}
         >
           <Box sx={{ textAlign: 'center', mb: 3 }}>
+            {/* Logo Trường */}
+            <Box 
+              component="img"
+              src="/images/dau-logo.svg"
+              alt="Logo ĐH Kiến trúc Đà Nẵng"
+              sx={{
+                width: 100,
+                height: 100,
+                margin: '0 auto 20px',
+                display: 'block',
+                filter: 'drop-shadow(0 4px 8px rgba(200, 16, 46, 0.2))',
+                transition: 'transform 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                }
+              }}
+            />
+            
             <Typography 
               component="h1" 
               variant="h3" 
