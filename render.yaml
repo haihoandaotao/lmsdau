@@ -17,43 +17,14 @@ services:
           type: static_site
           property: url
       - key: MONGODB_URI
-        fromService:
-          name: lms-mongo
-          type: private_service
-          property: connectionString
-          # Fallback (override in Render dashboard if needed)
+        sync: false
+        # YOU MUST SET THIS IN RENDER DASHBOARD
+        # Use MongoDB Atlas free tier: https://cloud.mongodb.com
+        # Connection string format: mongodb+srv://<username>:<password>@cluster.mongodb.net/lms_database
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRE
         value: 30d
-
-  - type: private_service
-    name: lms-mongo
-    plan: starter
-    runtime: image
-    autoDeploy: true
-    image:
-      url: bitnami/mongodb:6.0
-    envVars:
-      - key: MONGODB_ROOT_PASSWORD
-        generateValue: true
-      - key: MONGODB_USERNAME
-        value: lms_user
-      - key: MONGODB_PASSWORD
-        generateValue: true
-      - key: MONGODB_DATABASE
-        value: lms_database
-    disks:
-      - name: mongo-data
-        mountPath: /bitnami/mongodb
-        sizeGB: 5
-    healthCheckPath: /
-    ports:
-      - port: 27017
-        protocol: tcp
-    # Expose an internal connection string for convenience
-    # Render doesn't natively inject this; we'll build it here for docs
-    # Note: lms-api will still connect using service DNS (lms-mongo:27017)
 
   - type: static_site
     name: lms-web
