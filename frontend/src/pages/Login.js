@@ -67,7 +67,7 @@ const Login = () => {
             {/* Logo Trường */}
             <Box 
               component="img"
-              src="/images/dau-logo.png"
+              src="/images/Logo-dau.png"
               alt="Logo ĐH Kiến trúc Đà Nẵng"
               sx={{
                 width: 120,
