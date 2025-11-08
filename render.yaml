@@ -3,8 +3,8 @@ services:
     name: lms-api
     env: node
     plan: free
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
     autoDeploy: true
     envVars:
       - key: NODE_ENV
@@ -12,34 +12,21 @@ services:
       - key: PORT
         value: 10000
       - key: CLIENT_URL
-        fromService:
-          name: lms-web
-          type: static_site
-          property: url
+        value: https://lms-web.onrender.com
       - key: MONGODB_URI
-        sync: false
-        # YOU MUST SET THIS IN RENDER DASHBOARD
-        # Use MongoDB Atlas free tier: https://cloud.mongodb.com
-        # Connection string format: mongodb+srv://<username>:<password>@cluster.mongodb.net/lms_database
+        value: mongodb+srv://lms_admin:lmsdau123@cluster0.baofaov.mongodb.net/lms_database?retryWrites=true&w=majority
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRE
         value: 30d
 
-  - type: static_site
+  - type: web
     name: lms-web
+    env: static
+    plan: free
     buildCommand: cd frontend && npm install && npm run build
-    publishPath: frontend/build
-    headers:
-      - path: /static/*
-        name: Cache-Control
-        value: public, max-age=31536000, immutable
-      - path: /asset-manifest.json
-        name: Cache-Control
-        value: public, max-age=0, must-revalidate
-      - path: /*
-        name: Cache-Control
-        value: public, max-age=0, must-revalidate
+    staticPublishPath: frontend/build
+    autoDeploy: true
     envVars:
       - key: REACT_APP_API_URL
         fromService:
