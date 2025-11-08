@@ -81,10 +81,19 @@ app.use('/api/forum', forumRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// Health check
-app.get('/', (req, res) => {
-  res.json({ message: 'LMS API is running' });
-});
+// Serve static files from React app in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '..', 'frontend', 'build')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'build', 'index.html'));
+  });
+} else {
+  // Health check for development
+  app.get('/', (req, res) => {
+    res.json({ message: 'LMS API is running' });
+  });
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {

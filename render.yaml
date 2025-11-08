@@ -2,28 +2,17 @@ services:
   - type: web
     name: lms-api
     env: node
-    plan: free
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    buildCommand: npm install && cd frontend && npm install && npm run build && cd ..
+    startCommand: npm start
     autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
-      - key: CLIENT_URL
-        value: https://lms-web.onrender.com
       - key: MONGODB_URI
         value: mongodb+srv://lms_admin:lmsdau123@cluster0.baofaov.mongodb.net/lms_database?retryWrites=true&w=majority
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRE
         value: 30d
-
-  - type: web
-    name: lms-web
-    env: static
-    plan: free
-    buildCommand: cd frontend && npm install && REACT_APP_API_URL=https://lms-api.onrender.com npm run build
-    staticPublishPath: frontend/build
-    autoDeploy: true
