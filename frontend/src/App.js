@@ -21,6 +21,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
 const CourseViewer = lazy(() => import('./pages/CourseViewer'));
+const ModuleManagement = lazy(() => import('./pages/ModuleManagement'));
 const Assignments = lazy(() => import('./pages/Assignments'));
 const AssignmentDetail = lazy(() => import('./pages/AssignmentDetail'));
 const Forum = lazy(() => import('./pages/Forum'));
@@ -229,6 +230,7 @@ function App() {
                     <Route index element={<Dashboard />} />
                     <Route path="courses" element={<Courses />} />
                     <Route path="courses/:id" element={<CourseDetail />} />
+                    <Route path="courses/:courseId/modules" element={<ModuleManagement />} />
                     <Route path="assignments" element={<Assignments />} />
                     <Route path="assignments/:id" element={<AssignmentDetail />} />
                     <Route path="forum" element={<Forum />} />

@@ -162,6 +162,19 @@ const CourseDetail = () => {
                   )}
                 </Box>
               )}
+
+              {(user.role === 'teacher' || user.role === 'admin') && (
+                <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+                  <Button 
+                    variant="contained" 
+                    color="primary"
+                    onClick={() => navigate(`/courses/${id}/modules`)}
+                    sx={{ flexGrow: 1 }}
+                  >
+                    Quản lý nội dung
+                  </Button>
+                </Box>
+              )}
             </CardContent>
           </Card>
 
