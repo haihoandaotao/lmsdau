@@ -412,4 +412,47 @@ router.post('/test-login', async (req, res) => {
   }
 });
 
+// @route   POST /api/seed/fix-teacher
+// @desc    Delete and recreate teacher account with correct password
+// @access  Public
+router.post('/fix-teacher', async (req, res) => {
+  try {
+    const email = 'giaovien@dau.edu.vn';
+    const password = '123456';
+
+    // Delete existing user
+    await User.deleteOne({ email });
+
+    // Create new user with proper password hashing
+    const user = await User.create({
+      name: 'GV. Nguyễn Văn An',
+      email: email,
+      password: password, // Will be auto-hashed by pre-save hook
+      role: 'teacher',
+      department: 'Khoa Công nghệ Thông tin'
+    });
+
+    res.json({
+      success: true,
+      message: 'Teacher account recreated successfully! Try login now.',
+      data: {
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        credentials: {
+          email: email,
+          password: password
+        }
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fixing teacher account:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fixing teacher account',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
