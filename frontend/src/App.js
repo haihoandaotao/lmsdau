@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { Suspense, lazy, useMemo, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useMemo, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -12,9 +11,10 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import Layout from './components/Layout';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
-// Pages
-import { Suspense, lazy } from 'react';
+// Lazy load pages
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -26,10 +26,6 @@ const Forum = lazy(() => import('./pages/Forum'));
 const ForumPost = lazy(() => import('./pages/ForumPost'));
 const Progress = lazy(() => import('./pages/Progress'));
 const Profile = lazy(() => import('./pages/Profile'));
-
-// Components
-import Layout from './components/Layout';
-import ErrorBoundary from './components/common/ErrorBoundary';
 
 const ThemeWrapper = ({ children }) => {
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
