@@ -30,28 +30,26 @@ router.post('/init', async (req, res) => {
     await Assignment.deleteMany({});
     await ForumPost.deleteMany({});
 
-    // Create users
-    const hashedPassword = await bcrypt.hash('123456', 10);
-
+    // Create users - password will be auto-hashed by User model's pre-save hook
     const users = await User.create([
       {
         name: 'GV. Nguyễn Văn An',
         email: 'giaovien@dau.edu.vn',
-        password: hashedPassword,
+        password: '123456',
         role: 'teacher',
         department: 'Khoa Công nghệ Thông tin'
       },
       {
         name: 'GV. Trần Thị Bình',
         email: 'gvbinh@dau.edu.vn',
-        password: hashedPassword,
+        password: '123456',
         role: 'teacher',
         department: 'Khoa Kiến trúc'
       },
       {
         name: 'Phạm Minh Tuấn',
         email: 'student1@dau.edu.vn',
-        password: hashedPassword,
+        password: '123456',
         role: 'student',
         studentId: 'SV001',
         major: 'Công nghệ Thông tin'
@@ -59,7 +57,7 @@ router.post('/init', async (req, res) => {
       {
         name: 'Lê Thị Hương',
         email: 'student2@dau.edu.vn',
-        password: hashedPassword,
+        password: '123456',
         role: 'student',
         studentId: 'SV002',
         major: 'Kiến trúc'
@@ -67,7 +65,7 @@ router.post('/init', async (req, res) => {
       {
         name: 'Võ Đức Anh',
         email: 'student3@dau.edu.vn',
-        password: hashedPassword,
+        password: '123456',
         role: 'student',
         studentId: 'SV003',
         major: 'Công nghệ Thông tin'
