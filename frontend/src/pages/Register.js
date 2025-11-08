@@ -109,7 +109,7 @@ const Register = () => {
                 color: 'text.secondary',
               }}
             >
-              Đại học Đông Á
+              Trường Đại học Kiến trúc Đà Nẵng
             </Typography>
           </Box>
           

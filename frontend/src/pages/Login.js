@@ -94,7 +94,7 @@ const Login = () => {
                 fontSize: '0.875rem',
               }}
             >
-              Đại học Đông Á
+              Trường Đại học Kiến trúc Đà Nẵng
             </Typography>
           </Box>
           
