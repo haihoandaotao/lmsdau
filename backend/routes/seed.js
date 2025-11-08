@@ -410,6 +410,52 @@ router.post('/test-login', async (req, res) => {
   }
 });
 
+// @route   POST /api/seed/make-teacher
+// @desc    Update any user to teacher role
+// @access  Public
+router.post('/make-teacher', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email'
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: `User with email ${email} not found`
+      });
+    }
+
+    user.role = 'teacher';
+    user.department = 'Khoa Công nghệ Thông tin';
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `User ${email} is now a teacher! You can now manage course content.`,
+      data: {
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        department: user.department
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error making teacher:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error making teacher',
+      error: error.message
+    });
+  }
+});
+
 // @route   POST /api/seed/fix-teacher
 // @desc    Delete and recreate teacher account with correct password
 // @access  Public
