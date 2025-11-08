@@ -83,13 +83,18 @@ const Register = () => {
             {/* Logo Trường */}
             <Box 
               component="img"
-              src="/images/Logo-dau.png"
+              src={`${process.env.PUBLIC_URL}/images/Logo-dau.png`}
               alt="Logo ĐH Kiến trúc Đà Nẵng"
+              onError={(e) => {
+                console.error('Logo load error:', e);
+                e.target.style.display = 'none';
+              }}
               sx={{
                 width: 100,
                 height: 100,
                 margin: '0 auto 20px',
                 display: 'block',
+                objectFit: 'contain',
                 filter: 'drop-shadow(0 4px 8px rgba(200, 16, 46, 0.2))',
                 transition: 'transform 0.3s ease',
                 '&:hover': {
