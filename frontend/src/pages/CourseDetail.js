@@ -139,13 +139,24 @@ const CourseDetail = () => {
               </Box>
 
               {user.role === 'student' && (
-                <Box sx={{ mt: 2 }}>
+                <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
                   {isEnrolled() ? (
-                    <Button variant="outlined" color="secondary" onClick={handleUnenroll}>
-                      Hủy đăng ký
-                    </Button>
+                    <>
+                      <Button 
+                        variant="contained" 
+                        color="primary"
+                        startIcon={<PersonIcon />}
+                        onClick={() => navigate(`/courses/${id}/learn`)}
+                        sx={{ flexGrow: 1 }}
+                      >
+                        Học ngay
+                      </Button>
+                      <Button variant="outlined" color="secondary" onClick={handleUnenroll}>
+                        Hủy đăng ký
+                      </Button>
+                    </>
                   ) : (
-                    <Button variant="contained" onClick={handleEnroll}>
+                    <Button variant="contained" onClick={handleEnroll} sx={{ flexGrow: 1 }}>
                       Đăng ký khóa học
                     </Button>
                   )}

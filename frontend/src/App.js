@@ -20,6 +20,7 @@ const Register = lazy(() => import('./pages/Register'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
+const CourseViewer = lazy(() => import('./pages/CourseViewer'));
 const Assignments = lazy(() => import('./pages/Assignments'));
 const AssignmentDetail = lazy(() => import('./pages/AssignmentDetail'));
 const Forum = lazy(() => import('./pages/Forum'));
@@ -220,6 +221,10 @@ function App() {
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+                  
+                  {/* Course Viewer - Outside Layout for fullscreen experience */}
+                  <Route path="/courses/:courseId/learn" element={<PrivateRoute><CourseViewer /></PrivateRoute>} />
+                  
                   <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
                     <Route index element={<Dashboard />} />
                     <Route path="courses" element={<Courses />} />

@@ -9,6 +9,10 @@ const path = require('path');
 // Load environment variables
 dotenv.config();
 
+// Debug: Check if env is loaded
+console.log('📝 MONGODB_URI:', process.env.MONGODB_URI ? 'Found (Atlas)' : 'NOT FOUND');
+console.log('📝 PORT:', process.env.PORT);
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
@@ -18,6 +22,8 @@ const forumRoutes = require('./routes/forum');
 const progressRoutes = require('./routes/progress');
 const notificationRoutes = require('./routes/notifications');
 const seedRoutes = require('./routes/seed');
+const moduleRoutes = require('./routes/modules');
+const videoProgressRoutes = require('./routes/videoProgress');
 
 // Initialize express app
 const app = express();
@@ -42,10 +48,9 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use('/setup', express.static(path.join(__dirname, 'public')));
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+console.log('🔌 Connecting to MongoDB Atlas...');
+console.log('URI:', process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('✅ MongoDB Connected'))
 .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
@@ -63,14 +68,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
-  });
-
 // Make io accessible to routes and globally
 app.set('io', io);
 global.io = io;
@@ -84,6 +81,8 @@ app.use('/api/forum', forumRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/seed', seedRoutes);
+app.use('/api/modules', moduleRoutes);
+app.use('/api/video-progress', videoProgressRoutes);
 
 // Serve static files from React app in production
 if (process.env.NODE_ENV === 'production') {

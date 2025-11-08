@@ -5,6 +5,8 @@ const User = require('../models/User');
 const Course = require('../models/Course');
 const Assignment = require('../models/Assignment');
 const ForumPost = require('../models/ForumPost');
+const Module = require('../models/Module');
+const { sampleModules } = require('../seeders/moduleSeeder');
 
 // @route   POST /api/seed/init
 // @desc    Seed database with initial data (ONLY for development/demo)
@@ -245,6 +247,7 @@ router.get('/status', async (req, res) => {
     const courseCount = await Course.countDocuments();
     const assignmentCount = await Assignment.countDocuments();
     const forumPostCount = await ForumPost.countDocuments();
+    const moduleCount = await Module.countDocuments();
 
     res.json({
       success: true,
@@ -252,7 +255,8 @@ router.get('/status', async (req, res) => {
         users: userCount,
         courses: courseCount,
         assignments: assignmentCount,
-        forumPosts: forumPostCount
+        forumPosts: forumPostCount,
+        modules: moduleCount
       }
     });
   } catch (error) {
@@ -260,6 +264,57 @@ router.get('/status', async (req, res) => {
       success: false,
       message: 'Error checking database status', 
       error: error.message 
+    });
+  }
+});
+
+// @route   POST /api/seed/modules
+// @desc    Seed modules for existing courses
+// @access  Public (demo only)
+router.post('/modules', async (req, res) => {
+  try {
+    console.log('🌱 Seeding modules...');
+    
+    // Find courses
+    const courses = await Course.find().limit(3);
+    
+    if (courses.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No courses found. Please seed courses first.'
+      });
+    }
+    
+    // Clear existing modules
+    await Module.deleteMany({});
+    
+    let totalCreated = 0;
+    
+    // Create modules for each course
+    for (const course of courses) {
+      for (const moduleData of sampleModules) {
+        await Module.create({
+          ...moduleData,
+          course: course._id
+        });
+        totalCreated++;
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: `Successfully created ${totalCreated} modules for ${courses.length} courses`,
+      data: {
+        modulesCreated: totalCreated,
+        coursesUpdated: courses.length
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error seeding modules:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error seeding modules',
+      error: error.message
     });
   }
 });
