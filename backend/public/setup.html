@@ -264,6 +264,18 @@
       </div>
     </div>
 
+    <!-- Test Login Section -->
+    <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+      <h3 style="margin-top: 0;">🧪 Test Login</h3>
+      <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="email" id="testEmail" placeholder="Email" value="giaovien@dau.edu.vn" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <input type="password" id="testPassword" placeholder="Password" value="123456" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <button onclick="testLogin()" style="padding: 8px 20px; background: #ffc107; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Test</button>
+      </div>
+      <button onclick="resetPassword()" style="padding: 8px 20px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer;">Reset Password</button>
+      <div id="testResult" style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; font-size: 14px; display: none;"></div>
+    </div>
+
     <div class="link">
       <a href="/" id="loginLink">← Quay về trang đăng nhập</a>
     </div>
@@ -290,6 +302,79 @@
       document.getElementById('courseCount').textContent = data.courses || 0;
       document.getElementById('assignmentCount').textContent = data.assignments || 0;
       document.getElementById('forumPostCount').textContent = data.forumPosts || 0;
+    }
+
+    async function testLogin() {
+      const email = document.getElementById('testEmail').value;
+      const password = document.getElementById('testPassword').value;
+      const resultEl = document.getElementById('testResult');
+
+      try {
+        showLoader(true);
+        const response = await fetch(`${API_URL}/seed/test-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+        resultEl.style.display = 'block';
+
+        if (data.success) {
+          const match = data.data.passwordMatch;
+          resultEl.innerHTML = `
+            <strong>${match ? '✅ SUCCESS' : '❌ FAILED'}</strong><br>
+            Email: ${data.data.email}<br>
+            Name: ${data.data.name}<br>
+            Role: ${data.data.role}<br>
+            Password Match: ${match ? 'YES ✅' : 'NO ❌'}<br>
+            Has Password Hash: ${data.data.hasPasswordField ? 'YES' : 'NO'}<br>
+            Hash Length: ${data.data.passwordHashLength}
+          `;
+          resultEl.style.background = match ? '#d4edda' : '#f8d7da';
+          resultEl.style.color = match ? '#155724' : '#721c24';
+        } else {
+          resultEl.innerHTML = `<strong>❌ Error:</strong> ${data.message}`;
+          resultEl.style.background = '#f8d7da';
+          resultEl.style.color = '#721c24';
+        }
+      } catch (error) {
+        resultEl.style.display = 'block';
+        resultEl.innerHTML = `<strong>❌ Error:</strong> ${error.message}`;
+        resultEl.style.background = '#f8d7da';
+        resultEl.style.color = '#721c24';
+      } finally {
+        showLoader(false);
+      }
+    }
+
+    async function resetPassword() {
+      const email = document.getElementById('testEmail').value;
+      const password = document.getElementById('testPassword').value;
+
+      if (!confirm(`Reset password for ${email} to "${password}"?`)) return;
+
+      try {
+        showLoader(true);
+        const response = await fetch(`${API_URL}/seed/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, newPassword: password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage('✅ Password reset thành công!', 'success');
+          setTimeout(() => testLogin(), 500);
+        } else {
+          showMessage('❌ Lỗi: ' + data.message, 'error');
+        }
+      } catch (error) {
+        showMessage('❌ Lỗi: ' + error.message, 'error');
+      } finally {
+        showLoader(false);
+      }
     }
 
     async function checkStatus() {

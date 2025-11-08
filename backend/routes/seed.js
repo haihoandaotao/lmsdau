@@ -319,4 +319,97 @@ router.post('/modules', async (req, res) => {
   }
 });
 
+// @route   POST /api/seed/reset-password
+// @desc    Reset password for a specific user (dev/demo only)
+// @access  Public
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    
+    if (!email || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and newPassword'
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: `User with email ${email} not found`
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `Password reset successfully for ${email}`,
+      data: {
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error resetting password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error resetting password',
+      error: error.message
+    });
+  }
+});
+
+// @route   POST /api/seed/test-login
+// @desc    Test login credentials (dev/demo only)
+// @access  Public
+router.post('/test-login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and password'
+      });
+    }
+
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: `User with email ${email} not found in database`
+      });
+    }
+
+    // Test password comparison
+    const isMatch = await user.comparePassword(password);
+
+    res.json({
+      success: true,
+      message: 'Test completed',
+      data: {
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        passwordMatch: isMatch,
+        hasPasswordField: !!user.password,
+        passwordHashLength: user.password?.length || 0
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error testing login:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error testing login',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
