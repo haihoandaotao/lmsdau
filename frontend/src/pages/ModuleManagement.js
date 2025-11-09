@@ -61,8 +61,10 @@ function ModuleManagement() {
   const [course, setCourse] = useState(null);
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   
   // Module dialog state
   const [moduleDialog, setModuleDialog] = useState(false);
@@ -153,6 +155,7 @@ function ModuleManagement() {
 
   const handleSaveModule = async () => {
     try {
+      setSubmitting(true);
       const token = localStorage.getItem('token');
       const data = {
         ...moduleForm,
@@ -166,33 +169,38 @@ function ModuleManagement() {
         await axios.put(`${API_URL}/modules/${editingModule._id}`, data, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setSuccess('Cập nhật module thành công!');
+        setSnackbar({ open: true, message: 'Cập nhật module thành công!', severity: 'success' });
       } else {
         await axios.post(`${API_URL}/modules`, data, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setSuccess('Tạo module mới thành công!');
+        setSnackbar({ open: true, message: 'Tạo module mới thành công!', severity: 'success' });
       }
 
       setModuleDialog(false);
       fetchCourseAndModules();
     } catch (err) {
-      setError('Lỗi: ' + err.response?.data?.message || err.message);
+      setSnackbar({ open: true, message: 'Lỗi: ' + (err.response?.data?.message || err.message), severity: 'error' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleDeleteModule = async (moduleId) => {
-    if (!window.confirm('Bạn có chắc muốn xóa module này?')) return;
+    if (!window.confirm('Bạn có chắc muốn xóa module này? Tất cả nội dung bên trong sẽ bị xóa!')) return;
     
     try {
+      setSubmitting(true);
       const token = localStorage.getItem('token');
       await axios.delete(`${API_URL}/modules/${moduleId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setSuccess('Xóa module thành công!');
+      setSnackbar({ open: true, message: 'Xóa module thành công!', severity: 'success' });
       fetchCourseAndModules();
     } catch (err) {
-      setError('Lỗi: ' + err.response?.data?.message || err.message);
+      setSnackbar({ open: true, message: 'Lỗi: ' + (err.response?.data?.message || err.message), severity: 'error' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -240,6 +248,7 @@ function ModuleManagement() {
 
   const handleSaveItem = async () => {
     try {
+      setSubmitting(true);
       const token = localStorage.getItem('token');
       const data = { ...itemForm };
 
@@ -249,20 +258,22 @@ function ModuleManagement() {
           data,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setSuccess('Cập nhật bài học thành công!');
+        setSnackbar({ open: true, message: 'Cập nhật bài học thành công!', severity: 'success' });
       } else {
         await axios.post(
           `${API_URL}/modules/${currentModuleId}/items`,
           data,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setSuccess('Thêm bài học mới thành công!');
+        setSnackbar({ open: true, message: 'Thêm bài học mới thành công!', severity: 'success' });
       }
 
       setItemDialog(false);
       fetchCourseAndModules();
     } catch (err) {
-      setError('Lỗi: ' + err.response?.data?.message || err.message);
+      setSnackbar({ open: true, message: 'Lỗi: ' + (err.response?.data?.message || err.message), severity: 'error' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -270,14 +281,17 @@ function ModuleManagement() {
     if (!window.confirm('Bạn có chắc muốn xóa bài học này?')) return;
     
     try {
+      setSubmitting(true);
       const token = localStorage.getItem('token');
       await axios.delete(`${API_URL}/modules/${moduleId}/items/${itemId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setSuccess('Xóa bài học thành công!');
+      setSnackbar({ open: true, message: 'Xóa bài học thành công!', severity: 'success' });
       fetchCourseAndModules();
     } catch (err) {
-      setError('Lỗi: ' + err.response?.data?.message || err.message);
+      setSnackbar({ open: true, message: 'Lỗi: ' + (err.response?.data?.message || err.message), severity: 'error' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -305,8 +319,11 @@ function ModuleManagement() {
 
   if (loading) {
     return (
-      <Container sx={{ mt: 4, textAlign: 'center' }}>
-        <Typography>Đang tải...</Typography>
+      <Container sx={{ mt: 4 }}>
+        <Skeleton variant="rectangular" height={60} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" height={200} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" height={200} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" height={200} />
       </Container>
     );
   }
@@ -344,16 +361,20 @@ function ModuleManagement() {
       </Box>
 
       {/* Alerts */}
-      {error && (
-        <Alert severity="error" onClose={() => setError('')} sx={{ mb: 2 }}>
-          {error}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
         </Alert>
-      )}
-      {success && (
-        <Alert severity="success" onClose={() => setSuccess('')} sx={{ mb: 2 }}>
-          {success}
-        </Alert>
-      )}
+      </Snackbar>
 
       {/* Modules List */}
       {modules.length === 0 ? (
@@ -397,23 +418,29 @@ function ModuleManagement() {
                     />
                   </Box>
                 </Box>
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenModuleDialog(module);
-                  }}
-                >
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteModule(module._id);
-                  }}
-                  color="error"
-                >
-                  <DeleteIcon />
-                </IconButton>
+                <Tooltip title="Chỉnh sửa module">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenModuleDialog(module);
+                    }}
+                    disabled={submitting}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Xóa module">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteModule(module._id);
+                    }}
+                    color="error"
+                    disabled={submitting}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </AccordionSummary>
             <AccordionDetails>
@@ -454,21 +481,27 @@ function ModuleManagement() {
                             ? `Bài đọc • ${item.readingTime} phút`
                             : item.description
                         }
-                      />
+                      </ListItemText>
                       <ListItemSecondaryAction>
-                        <IconButton
-                          onClick={() => handleOpenItemDialog(module._id, item)}
-                          edge="end"
-                        >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton
-                          onClick={() => handleDeleteItem(module._id, item._id)}
-                          edge="end"
-                          color="error"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
+                        <Tooltip title="Chỉnh sửa bài học">
+                          <IconButton
+                            onClick={() => handleOpenItemDialog(module._id, item)}
+                            edge="end"
+                            disabled={submitting}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Xóa bài học">
+                          <IconButton
+                            onClick={() => handleDeleteItem(module._id, item._id)}
+                            edge="end"
+                            color="error"
+                            disabled={submitting}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
                       </ListItemSecondaryAction>
                     </ListItem>
                     {itemIndex < module.items.length - 1 && <Divider />}
