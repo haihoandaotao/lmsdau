@@ -118,7 +118,7 @@ function ModuleManagement() {
       const modulesRes = await axios.get(`${API_URL}/modules/course/${courseId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setModules(modulesRes.data);
+      setModules(modulesRes.data.data || modulesRes.data);
       
       setLoading(false);
     } catch (err) {
