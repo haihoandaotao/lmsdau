@@ -174,7 +174,7 @@ const CourseViewer = () => {
         return (
           <Box>
             <VideoPlayer
-              videoUrl={currentItem.content}
+              videoUrl={currentItem.videoUrl}
               itemId={currentItem._id}
               courseId={courseId}
               moduleId={currentModule._id}

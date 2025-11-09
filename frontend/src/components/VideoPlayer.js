@@ -39,7 +39,7 @@ const VideoPlayer = ({
   const [quality, setQuality] = useState('auto');
 
   useEffect(() => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || !videoUrl) return;
 
     // Check if it's a YouTube URL
     const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
@@ -208,6 +208,15 @@ const VideoPlayer = ({
     }
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Guard: return early if no videoUrl
+  if (!videoUrl) {
+    return (
+      <Box sx={{ width: '100%', bgcolor: 'black', p: 4, textAlign: 'center', borderRadius: 1 }}>
+        <Typography color="white">Không có video để phát</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: '100%', bgcolor: 'black', position: 'relative', borderRadius: 1, overflow: 'hidden' }}>
