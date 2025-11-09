@@ -7,6 +7,7 @@ const Assignment = require('../models/Assignment');
 const ForumPost = require('../models/ForumPost');
 const Module = require('../models/Module');
 const { sampleModules } = require('../seeders/moduleSeeder');
+const { seedRealModules } = require('../seeders/realModuleSeeder');
 
 // @route   POST /api/seed/init
 // @desc    Seed database with initial data (ONLY for development/demo)
@@ -595,6 +596,38 @@ router.post('/fix-all-passwords', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fixing all passwords',
+      error: error.message
+    });
+  }
+});
+
+// @route   POST /api/seed/real-modules
+// @desc    Seed database with real programming tutorial videos
+// @access  Public (development only)
+router.post('/real-modules', async (req, res) => {
+  try {
+    console.log('🎥 Seeding real programming tutorial modules...');
+    
+    await seedRealModules();
+    
+    const totalModules = await Module.countDocuments();
+    const courses = await Course.find({}).select('title');
+    
+    return res.json({
+      success: true,
+      message: '✅ Successfully seeded real programming tutorial videos!',
+      details: {
+        totalModules,
+        courses: courses.map(c => c.title),
+        videosPerCourse: 8,
+        description: 'Real YouTube videos from popular programming channels'
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error seeding real modules:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to seed real modules',
       error: error.message
     });
   }

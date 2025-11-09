@@ -28,7 +28,11 @@ import {
   Grid,
   Switch,
   FormControlLabel,
-  Divider
+  Divider,
+  Tooltip,
+  CircularProgress,
+  Snackbar,
+  Skeleton
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -42,7 +46,8 @@ import {
   Forum as ForumIcon,
   DragIndicator as DragIcon,
   ArrowBack as BackIcon,
-  Save as SaveIcon
+  Save as SaveIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
