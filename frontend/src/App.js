@@ -28,6 +28,8 @@ const Forum = lazy(() => import('./pages/Forum'));
 const ForumPost = lazy(() => import('./pages/ForumPost'));
 const Progress = lazy(() => import('./pages/Progress'));
 const Profile = lazy(() => import('./pages/Profile'));
+const Gradebook = lazy(() => import('./pages/Gradebook'));
+const StudentGrades = lazy(() => import('./pages/StudentGrades'));
 
 const ThemeWrapper = ({ children }) => {
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
@@ -231,6 +233,8 @@ function App() {
                     <Route path="courses" element={<Courses />} />
                     <Route path="courses/:id" element={<CourseDetail />} />
                     <Route path="courses/:courseId/modules" element={<ModuleManagement />} />
+                    <Route path="courses/:courseId/gradebook" element={<Gradebook />} />
+                    <Route path="courses/:courseId/my-grades" element={<StudentGrades />} />
                     <Route path="assignments" element={<Assignments />} />
                     <Route path="assignments/:id" element={<AssignmentDetail />} />
                     <Route path="forum" element={<Forum />} />

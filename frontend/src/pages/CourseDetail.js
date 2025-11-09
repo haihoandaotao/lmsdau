@@ -179,6 +179,27 @@ const CourseDetail = () => {
                   >
                     Quản lý nội dung
                   </Button>
+                  <Button 
+                    variant="contained" 
+                    color="secondary"
+                    onClick={() => navigate(`/courses/${id}/gradebook`)}
+                    sx={{ flexGrow: 1 }}
+                  >
+                    Bảng điểm
+                  </Button>
+                </Box>
+              )}
+
+              {user.role === 'student' && isEnrolled() && (
+                <Box sx={{ mt: 2 }}>
+                  <Button 
+                    variant="outlined" 
+                    color="primary"
+                    onClick={() => navigate(`/courses/${id}/my-grades`)}
+                    fullWidth
+                  >
+                    Xem điểm của tôi
+                  </Button>
                 </Box>
               )}
             </CardContent>

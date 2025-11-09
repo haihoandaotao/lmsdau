@@ -24,6 +24,7 @@ const notificationRoutes = require('./routes/notifications');
 const seedRoutes = require('./routes/seed');
 const moduleRoutes = require('./routes/modules');
 const videoProgressRoutes = require('./routes/videoProgress');
+const gradeRoutes = require('./routes/grades');
 
 // Initialize express app
 const app = express();
@@ -83,6 +84,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/seed', seedRoutes);
 app.use('/api/modules', moduleRoutes);
 app.use('/api/video-progress', videoProgressRoutes);
+app.use('/api/grades', gradeRoutes);
 
 // Serve static files from React app in production
 if (process.env.NODE_ENV === 'production') {
