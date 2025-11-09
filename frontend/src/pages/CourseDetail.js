@@ -31,7 +31,7 @@ import PageHeader from '../components/common/PageHeader';
 const CourseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [course, setCourse] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +67,7 @@ const CourseDetail = () => {
     try {
       await api.post(`/courses/${id}/enroll`);
       toast.success('Đăng ký khóa học thành công!');
+      await refreshUser(); // Refresh user data to update enrolledCourses
       fetchCourseDetail(); // Refresh course data
     } catch (error) {
       toast.error(error.response?.data?.message || 'Đăng ký thất bại');
@@ -77,6 +78,7 @@ const CourseDetail = () => {
     try {
       await api.post(`/courses/${id}/unenroll`);
       toast.success('Hủy đăng ký thành công!');
+      await refreshUser(); // Refresh user data
       fetchCourseDetail();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Hủy đăng ký thất bại');
