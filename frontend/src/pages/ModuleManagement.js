@@ -62,8 +62,6 @@ function ModuleManagement() {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   
   // Module dialog state
@@ -354,13 +352,14 @@ function ModuleManagement() {
             color="primary"
             startIcon={<AddIcon />}
             onClick={() => handleOpenModuleDialog()}
+            disabled={submitting}
           >
             Thêm Module
           </Button>
         </Box>
       </Box>
 
-      {/* Alerts */}
+      {/* Snackbar Notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -481,7 +480,7 @@ function ModuleManagement() {
                             ? `Bài đọc • ${item.readingTime} phút`
                             : item.description
                         }
-                      </ListItemText>
+                      />
                       <ListItemSecondaryAction>
                         <Tooltip title="Chỉnh sửa bài học">
                           <IconButton
@@ -513,6 +512,7 @@ function ModuleManagement() {
                 startIcon={<AddIcon />}
                 onClick={() => handleOpenItemDialog(module._id)}
                 sx={{ mt: 2 }}
+                disabled={submitting}
               >
                 Thêm bài học
               </Button>
