@@ -561,4 +561,43 @@ router.post('/fix-teacher', async (req, res) => {
   }
 });
 
+// @route   POST /api/seed/fix-all-passwords
+// @desc    Reset ALL user passwords to 123456 (dev/demo only)
+// @access  Public
+router.post('/fix-all-passwords', async (req, res) => {
+  try {
+    const users = await User.find({}).select('+password');
+    const results = [];
+
+    for (const user of users) {
+      user.password = '123456'; // Pre-save hook will hash it
+      await user.save();
+      
+      // Test immediately
+      const testUser = await User.findOne({ email: user.email }).select('+password');
+      const isMatch = await testUser.comparePassword('123456');
+      
+      results.push({
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        passwordFixed: isMatch
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Fixed passwords for ${users.length} users! All passwords are now: 123456`,
+      results: results
+    });
+  } catch (error) {
+    console.error('❌ Error fixing all passwords:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fixing all passwords',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
