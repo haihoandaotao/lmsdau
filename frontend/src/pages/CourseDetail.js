@@ -86,7 +86,11 @@ const CourseDetail = () => {
   };
 
   const isEnrolled = () => {
-    return user?.enrolledCourses?.some(c => c === id);
+    return user?.enrolledCourses?.some(c => {
+      // Handle both object format {_id, title, ...} and string format
+      const courseId = typeof c === 'object' ? c._id : c;
+      return courseId === id;
+    });
   };
 
   if (loading) {
