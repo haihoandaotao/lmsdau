@@ -122,7 +122,11 @@ function ModuleManagement() {
       
       setLoading(false);
     } catch (err) {
-      setError('Không thể tải dữ liệu: ' + err.response?.data?.message || err.message);
+      setSnackbar({ 
+        open: true, 
+        message: 'Không thể tải dữ liệu: ' + (err.response?.data?.message || err.message), 
+        severity: 'error' 
+      });
       setLoading(false);
     }
   };
