@@ -296,3 +296,102 @@ exports.addMaterial = async (req, res) => {
     });
   }
 };
+
+// @desc    Update course settings (syllabus, grading, access)
+// @route   PUT /api/courses/:id/settings
+// @access  Private (Instructor/Admin)
+exports.updateCourseSettings = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    // Check authorization
+    if (
+      course.instructor.toString() !== req.user.id &&
+      req.user.role !== 'admin'
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this course settings'
+      });
+    }
+
+    // Update allowed fields
+    const allowedUpdates = [
+      'syllabus',
+      'objectives',
+      'courseFormat',
+      'startDate',
+      'endDate',
+      'gradingScheme',
+      'accessSettings'
+    ];
+
+    allowedUpdates.forEach(field => {
+      if (req.body[field] !== undefined) {
+        course[field] = req.body[field];
+      }
+    });
+
+    await course.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Course settings updated successfully',
+      data: course
+    });
+  } catch (error) {
+    console.error('Update course settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Get course settings
+// @route   GET /api/courses/:id/settings
+// @access  Private (Enrolled/Instructor/Admin)
+exports.getCourseSettings = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id)
+      .populate('instructor', 'name email')
+      .select('title code syllabus objectives courseFormat startDate endDate gradingScheme accessSettings');
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    // Check if user has access
+    const isInstructor = course.instructor._id.toString() === req.user.id;
+    const isEnrolled = course.enrolledStudents?.includes(req.user.id);
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isInstructor && !isEnrolled && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view course settings'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: course
+    });
+  } catch (error) {
+    console.error('Get course settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

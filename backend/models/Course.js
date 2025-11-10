@@ -77,6 +77,51 @@ const courseSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'
   }],
+  
+  // Course Settings
+  courseFormat: {
+    type: String,
+    enum: ['weekly', 'topics', 'social'],
+    default: 'topics'
+  },
+  startDate: Date,
+  endDate: Date,
+  
+  // Grading Configuration
+  gradingScheme: {
+    scale: {
+      type: String,
+      enum: ['percentage', 'points', 'letter'],
+      default: 'percentage'
+    },
+    passingGrade: {
+      type: Number,
+      default: 50
+    },
+    weights: {
+      assignments: { type: Number, default: 30 },
+      quizzes: { type: Number, default: 30 },
+      midterm: { type: Number, default: 20 },
+      final: { type: Number, default: 20 }
+    },
+    letterGrades: [{
+      letter: String,
+      minPercentage: Number,
+      maxPercentage: Number
+    }]
+  },
+  
+  // Access Settings
+  accessSettings: {
+    enrollmentKey: String,
+    allowGuestAccess: { type: Boolean, default: false },
+    visibility: {
+      type: String,
+      enum: ['public', 'private', 'hidden'],
+      default: 'public'
+    }
+  },
+  
   isActive: {
     type: Boolean,
     default: true
