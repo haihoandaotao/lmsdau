@@ -25,6 +25,7 @@ const seedRoutes = require('./routes/seed');
 const moduleRoutes = require('./routes/modules');
 const videoProgressRoutes = require('./routes/videoProgress');
 const gradeRoutes = require('./routes/grades');
+const submissionRoutes = require('./routes/submissions');
 
 // Initialize express app
 const app = express();
@@ -85,6 +86,7 @@ app.use('/api/seed', seedRoutes);
 app.use('/api/modules', moduleRoutes);
 app.use('/api/video-progress', videoProgressRoutes);
 app.use('/api/grades', gradeRoutes);
+app.use('/api/submissions', submissionRoutes);
 
 // Serve static files from React app in production
 if (process.env.NODE_ENV === 'production') {
