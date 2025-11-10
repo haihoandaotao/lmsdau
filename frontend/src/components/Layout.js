@@ -85,22 +85,24 @@ const Layout = () => {
         <Box display="flex" alignItems="center" gap={1.5} sx={{ width: '100%' }}>
           {/* Logo Trường */}
           <Box 
-            sx={{ 
-              width: 40, 
-              height: 40, 
-              bgcolor: 'white', 
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 900,
-              fontSize: '20px',
-              color: theme.palette.primary.main,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+            component="img"
+            src={`${process.env.PUBLIC_URL}/images/Logo-dau.png`}
+            alt="Logo ĐH Kiến trúc Đà Nẵng"
+            onError={(e) => {
+              console.error('Logo load error:', e);
+              e.target.style.display = 'none';
             }}
-          >
-            ĐAU
-          </Box>
+            sx={{ 
+              width: 45, 
+              height: 45, 
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.3))',
+              transition: 'transform 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.08)',
+              }
+            }}
+          />
           <Typography 
             variant="h5" 
             noWrap 
