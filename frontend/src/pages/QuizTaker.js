@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container, Paper, Typography, Box, Button, Radio, RadioGroup, FormControlLabel,
@@ -10,12 +10,12 @@ import {
   NavigateBefore as PrevIcon, NavigateNext as NextIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-import { AuthContext } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 function QuizTaker() {
   const navigate = useNavigate();
   const { quizId } = useParams();
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);

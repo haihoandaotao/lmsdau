@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container, Paper, Typography, Box, TextField, Button, Tabs, Tab, Grid,
@@ -11,7 +11,7 @@ import {
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import axios from 'axios';
-import { AuthContext } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 function TabPanel({ children, value, index }) {
   return (
@@ -24,7 +24,7 @@ function TabPanel({ children, value, index }) {
 function CourseSettings() {
   const navigate = useNavigate();
   const { courseId } = useParams();
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

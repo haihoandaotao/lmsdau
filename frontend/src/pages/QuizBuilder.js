@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   Container, Paper, Typography, Box, TextField, Button, IconButton, Snackbar, Alert,
@@ -10,7 +10,7 @@ import {
   Save as SaveIcon, Preview as PreviewIcon, ArrowBack as BackIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-import { AuthContext } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const questionTypes = [
   { value: 'multiple_choice', label: 'Trắc nghiệm (MCQ)' },
@@ -29,7 +29,7 @@ function QuizBuilder() {
   const navigate = useNavigate();
   const { quizId } = useParams();
   const location = useLocation();
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const courseId = new URLSearchParams(location.search).get('courseId');
 
   const [loading, setLoading] = useState(false);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container, Paper, Typography, Box, Button, Chip, Grid, Card, CardContent,
@@ -9,12 +9,12 @@ import {
   ArrowBack as BackIcon, Grade as GradeIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-import { AuthContext } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 function QuizResults() {
   const navigate = useNavigate();
   const { attemptId } = useParams();
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [attempt, setAttempt] = useState(null);

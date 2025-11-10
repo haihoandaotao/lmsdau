@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container, Paper, Typography, Box, Button, Card, CardContent, Grid, Chip,
@@ -9,12 +9,12 @@ import {
   Timer as TimerIcon, Quiz as QuizIcon, CheckCircle as PassIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-import { AuthContext } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 function Quizzes() {
   const navigate = useNavigate();
   const { courseId } = useParams();
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [quizzes, setQuizzes] = useState([]);
