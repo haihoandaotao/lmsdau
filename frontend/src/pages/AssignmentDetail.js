@@ -256,6 +256,63 @@ const AssignmentDetail = () => {
                   Nộp bài tập
                 </Typography>
 
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  onClick={() => navigate(`/assignments/${id}/submit`)}
+                  startIcon={<CloudUploadIcon />}
+                >
+                  {hasSubmitted ? 'Xem/Nộp lại bài tập' : 'Nộp bài tập'}
+                </Button>
+
+                {hasSubmitted && (
+                  <Alert severity="success" sx={{ mt: 2 }}>
+                    Bạn đã nộp bài tập vào {new Date(assignment.submission.submittedAt).toLocaleString('vi-VN')}
+                    {assignment.submission.grade !== undefined && (
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        Điểm: {assignment.submission.grade}/{assignment.maxScore}
+                      </Typography>
+                    )}
+                    {assignment.submission.feedback && (
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        Phản hồi: {assignment.submission.feedback}
+                      </Typography>
+                    )}
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {(user.role === 'teacher' || user.role === 'admin') && (
+            <Card sx={{ mt: 4 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Quản lý bài nộp
+                </Typography>
+                
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  onClick={() => navigate(`/assignments/${id}/submissions`)}
+                  startIcon={<AssignmentIcon />}
+                >
+                  Xem tất cả bài nộp
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* OLD SUBMISSION CODE - Keep for backward compatibility */}
+          {false && user.role === 'student' && (
+            <Card sx={{ mt: 4 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Nộp bài tập (Cũ)
+                </Typography>
+
                 {hasSubmitted ? (
                   <Alert severity="success">
                     Bạn đã nộp bài tập vào {new Date(assignment.submission.submittedAt).toLocaleString('vi-VN')}

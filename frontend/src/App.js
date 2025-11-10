@@ -24,6 +24,8 @@ const CourseViewer = lazy(() => import('./pages/CourseViewer'));
 const ModuleManagement = lazy(() => import('./pages/ModuleManagement'));
 const Assignments = lazy(() => import('./pages/Assignments'));
 const AssignmentDetail = lazy(() => import('./pages/AssignmentDetail'));
+const AssignmentSubmit = lazy(() => import('./pages/AssignmentSubmit'));
+const SubmissionsList = lazy(() => import('./pages/SubmissionsList'));
 const Forum = lazy(() => import('./pages/Forum'));
 const ForumPost = lazy(() => import('./pages/ForumPost'));
 const Progress = lazy(() => import('./pages/Progress'));
@@ -237,6 +239,8 @@ function App() {
                     <Route path="courses/:courseId/my-grades" element={<StudentGrades />} />
                     <Route path="assignments" element={<Assignments />} />
                     <Route path="assignments/:id" element={<AssignmentDetail />} />
+                    <Route path="assignments/:assignmentId/submit" element={<AssignmentSubmit />} />
+                    <Route path="assignments/:assignmentId/submissions" element={<SubmissionsList />} />
                     <Route path="forum" element={<Forum />} />
                     <Route path="forum/:id" element={<ForumPost />} />
                     <Route path="progress" element={<Progress />} />
