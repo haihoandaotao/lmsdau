@@ -171,16 +171,21 @@ const CourseViewer = () => {
 
     switch (currentItem.type) {
       case 'video':
+        console.log('Rendering video:', currentItem.videoUrl);
         return (
           <Box>
-            <VideoPlayer
-              videoUrl={currentItem.videoUrl}
-              itemId={currentItem._id}
-              courseId={courseId}
-              moduleId={currentModule._id}
-              startTime={currentItem.progress?.currentTime || 0}
-              onProgress={handleProgress}
-            />
+            {!currentItem.videoUrl ? (
+              <Alert severity="warning">Video URL không tồn tại</Alert>
+            ) : (
+              <VideoPlayer
+                videoUrl={currentItem.videoUrl}
+                itemId={currentItem._id}
+                courseId={courseId}
+                moduleId={currentModule._id}
+                startTime={currentItem.progress?.currentTime || 0}
+                onProgress={handleProgress}
+              />
+            )}
             
             {currentItem.description && (
               <Box sx={{ mt: 3, p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
