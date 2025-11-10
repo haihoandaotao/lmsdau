@@ -41,6 +41,7 @@ import axios from 'axios';
 import VideoPlayer from '../components/VideoPlayer';
 import EnhancedVideoPlayer from '../components/EnhancedVideoPlayer';
 import ProgressDashboard from '../components/ProgressDashboard';
+import QuickQuiz from '../components/QuickQuiz';
 
 const CourseViewer = () => {
   const { courseId } = useParams();
@@ -55,6 +56,8 @@ const CourseViewer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [courseProgress, setCourseProgress] = useState(null);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [completions, setCompletions] = useState({});
 
   useEffect(() => {
     fetchCourseData();
@@ -87,6 +90,20 @@ const CourseViewer = () => {
         console.log('No progress data yet');
       }
       
+      // Fetch item completions
+      try {
+        const completionRes = await axios.get(`/api/item-completion/course/${courseId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const completionMap = {};
+        completionRes.data.data.forEach(comp => {
+          completionMap[comp.item] = comp;
+        });
+        setCompletions(completionMap);
+      } catch (err) {
+        console.log('No completion data yet');
+      }
+      
       // Auto-select first video item
       if (modulesRes.data.data.length > 0) {
         const firstModule = modulesRes.data.data[0];
@@ -112,26 +129,18 @@ const CourseViewer = () => {
   };
 
   const handleItemClick = async (module, item) => {
-    // Check if item is locked
-    if (module.unlockCondition === 'sequential' && item.order > 1) {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get(
-          `/api/video-progress/check-unlock/${module._id}/${item._id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        
-        if (!res.data.data.isUnlocked) {
-          alert(res.data.data.message || 'Nội dung này chưa được mở khóa');
-          return;
-        }
-      } catch (err) {
-        console.error('Error checking unlock status:', err);
+    // Check if previous item is completed (sequential learning)
+    if (item.order > 1) {
+      const previousItem = module.items.find(i => i.order === item.order - 1);
+      if (previousItem && !completions[previousItem._id]?.completed) {
+        alert(`Bạn cần hoàn thành "${previousItem.title}" trước khi xem bài này!`);
+        return;
       }
     }
     
     setCurrentModule(module);
     setCurrentItem(item);
+    setShowQuiz(false);
   };
 
   const handleProgress = (progressData) => {
@@ -139,8 +148,35 @@ const CourseViewer = () => {
     console.log('Progress:', progressData);
   };
 
+  const handleQuizPass = async (quizScore) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('/api/item-completion/complete', {
+        itemId: currentItem._id,
+        moduleId: currentModule._id,
+        courseId: courseId,
+        quizScore
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Reload completions
+      const completionRes = await axios.get(`/api/item-completion/course/${courseId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const completionMap = {};
+      completionRes.data.data.forEach(comp => {
+        completionMap[comp.item] = comp;
+      });
+      setCompletions(completionMap);
+    } catch (err) {
+      console.error('Error saving completion:', err);
+    }
+  };
+
   const getItemIcon = (type, progress) => {
-    if (progress?.isCompleted) {
+    // Check completion status
+    if (completions[progress?._id || '']?.completed) {
       return <CheckCircle sx={{ color: '#4caf50' }} />;
     }
     
@@ -174,6 +210,50 @@ const CourseViewer = () => {
     switch (currentItem.type) {
       case 'video':
         console.log('Rendering video:', currentItem.videoUrl);
+        
+        // Generate quiz questions based on item
+        const quizQuestions = [
+          {
+            question: `Bạn đã hiểu nội dung chính của "${currentItem.title}" chưa?`,
+            options: [
+              'Đã hiểu hoàn toàn',
+              'Hiểu một phần',
+              'Chưa hiểu',
+              'Cần xem lại'
+            ],
+            correctAnswer: 'Đã hiểu hoàn toàn',
+            explanation: 'Tuyệt vời! Hãy tiếp tục học tập.'
+          },
+          {
+            question: 'Bạn có thể áp dụng kiến thức này vào thực tế không?',
+            options: [
+              'Có, hoàn toàn có thể',
+              'Có, nhưng cần luyện tập thêm',
+              'Chưa thể',
+              'Không chắc chắn'
+            ],
+            correctAnswer: 'Có, hoàn toàn có thể',
+            explanation: 'Thực hành nhiều sẽ giúp bạn thành thạo hơn!'
+          },
+          {
+            question: 'Bạn cảm thấy video này có hữu ích không?',
+            options: [
+              'Rất hữu ích',
+              'Khá hữu ích',
+              'Bình thường',
+              'Không hữu ích'
+            ],
+            correctAnswer: 'Rất hữu ích',
+            explanation: 'Cảm ơn feedback của bạn!'
+          }
+        ];
+        
+        if (showQuiz) {
+          return <QuickQuiz questions={quizQuestions} onPass={handleQuizPass} itemId={currentItem._id} />;
+        }
+        
+        const isCompleted = completions[currentItem._id]?.completed;
+        
         return (
           <Box>
             {!currentItem.videoUrl ? (
@@ -187,6 +267,32 @@ const CourseViewer = () => {
                 startTime={currentItem.progress?.currentTime || 0}
                 onProgress={handleProgress}
               />
+            )}
+            
+            {/* Quiz Button */}
+            {!isCompleted && (
+              <Paper sx={{ p: 3, mt: 3, bgcolor: '#e3f2fd', border: 2, borderColor: '#2196f3' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1976d2' }}>
+                  📝 Kiểm Tra Nhanh
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  Hoàn thành bài kiểm tra nhanh để mở khóa bài học tiếp theo.
+                </Typography>
+                <Button 
+                  variant="contained" 
+                  size="large"
+                  onClick={() => setShowQuiz(true)}
+                  sx={{ fontWeight: 600 }}
+                >
+                  Làm Bài Kiểm Tra
+                </Button>
+              </Paper>
+            )}
+            
+            {isCompleted && (
+              <Alert severity="success" sx={{ mt: 3 }}>
+                <strong>✅ Đã hoàn thành!</strong> Bạn đã đạt {completions[currentItem._id]?.quizScore}% trong bài kiểm tra.
+              </Alert>
             )}
             
             {currentItem.description && (
@@ -408,27 +514,32 @@ const CourseViewer = () => {
                       <List component="div" disablePadding>
                         {module.items.map((item, itemIndex) => {
                           const isActive = currentItem?._id === item._id;
-                          const progress = item.progress;
+                          const isCompleted = completions[item._id]?.completed;
+                          const isLocked = item.order > 1 && module.items.find(i => i.order === item.order - 1) && !completions[module.items.find(i => i.order === item.order - 1)?._id]?.completed;
                           
                           return (
                             <ListItemButton
                               key={item._id}
-                              sx={{ pl: 4, bgcolor: isActive ? 'action.selected' : 'transparent' }}
+                              sx={{ 
+                                pl: 4, 
+                                bgcolor: isActive ? 'action.selected' : 'transparent',
+                                opacity: isLocked ? 0.5 : 1
+                              }}
                               onClick={() => handleItemClick(module, item)}
+                              disabled={isLocked}
                             >
                               <ListItemIcon sx={{ minWidth: 36 }}>
-                                {getItemIcon(item.type, progress)}
+                                {isLocked ? <Lock color="disabled" /> : getItemIcon(item.type, item)}
                               </ListItemIcon>
                               <ListItemText
                                 primary={
                                   <Typography variant="body2">
                                     {item.title}
+                                    {isCompleted && ' ✓'}
                                   </Typography>
                                 }
                                 secondary={
-                                  progress?.watchedPercentage > 0 && progress?.watchedPercentage < 100
-                                    ? `${Math.round(progress.watchedPercentage)}%`
-                                    : null
+                                  isLocked ? 'Chưa mở khóa' : null
                                 }
                               />
                               {item.duration && (

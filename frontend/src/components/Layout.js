@@ -82,7 +82,25 @@ const Layout = () => {
   const drawer = (
     <div>
       <Toolbar sx={{ px: 2, backgroundColor: theme.palette.primary.main }}>
-        <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
+        <Box display="flex" alignItems="center" gap={1.5} sx={{ width: '100%' }}>
+          {/* Logo Trường */}
+          <Box 
+            sx={{ 
+              width: 40, 
+              height: 40, 
+              bgcolor: 'white', 
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 900,
+              fontSize: '20px',
+              color: theme.palette.primary.main,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+            }}
+          >
+            ĐAU
+          </Box>
           <Typography 
             variant="h5" 
             noWrap 
@@ -163,6 +181,26 @@ const Layout = () => {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             {/* Can display current page title here */}
           </Typography>
+
+          {/* Dark Mode Toggle - Moved here */}
+          <Tooltip title="Chế độ ban ngày/đêm">
+            <IconButton color="inherit" sx={{ mr: 1 }}>
+              <Box 
+                sx={{ 
+                  width: 24, 
+                  height: 24, 
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #ffd700 0%, #ff6b6b 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px'
+                }}
+              >
+                🌙
+              </Box>
+            </IconButton>
+          </Tooltip>
 
           <Tooltip title="Thông báo">
             <IconButton color="inherit" onClick={handleOpenNotificationsMenu}>
