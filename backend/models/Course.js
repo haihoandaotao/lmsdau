@@ -19,7 +19,7 @@ const courseSchema = new mongoose.Schema({
   instructor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   major: {
     type: mongoose.Schema.Types.ObjectId,
@@ -28,7 +28,7 @@ const courseSchema = new mongoose.Schema({
   },
   department: {
     type: String,
-    required: true
+    required: false
   },
   semester: {
     type: String,
