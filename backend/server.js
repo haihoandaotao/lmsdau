@@ -30,6 +30,7 @@ const quizRoutes = require('./routes/quizzes');
 const bookmarkRoutes = require('./routes/bookmarks');
 const noteRoutes = require('./routes/notes');
 const itemCompletionRoutes = require('./routes/itemCompletion');
+const resourceRoutes = require('./routes/resources');
 
 // Initialize express app
 const app = express();
@@ -95,6 +96,7 @@ app.use('/api/quizzes', quizRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/item-completion', itemCompletionRoutes);
+app.use('/api/resources', resourceRoutes);
 
 // Serve static files from React app in production
 if (process.env.NODE_ENV === 'production') {

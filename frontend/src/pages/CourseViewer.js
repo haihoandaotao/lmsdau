@@ -58,6 +58,7 @@ const CourseViewer = () => {
   const [courseProgress, setCourseProgress] = useState(null);
   const [showQuiz, setShowQuiz] = useState(false);
   const [completions, setCompletions] = useState({});
+  const [resources, setResources] = useState([]);
 
   useEffect(() => {
     fetchCourseData();
@@ -102,6 +103,16 @@ const CourseViewer = () => {
         setCompletions(completionMap);
       } catch (err) {
         console.log('No completion data yet');
+      }
+      
+      // Fetch resources
+      try {
+        const resourcesRes = await axios.get(`/api/resources/course/${courseId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setResources(resourcesRes.data.data);
+      } catch (err) {
+        console.log('No resources yet');
       }
       
       // Auto-select first video item
@@ -629,10 +640,80 @@ const CourseViewer = () => {
                 
                 {tabValue === 3 && (
                   <Box>
-                    <Typography variant="h6" gutterBottom>Tài nguyên</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Chưa có tài nguyên nào
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+                      📎 Tài Nguyên & File
                     </Typography>
+                    
+                    {resources.length === 0 ? (
+                      <Alert severity="info">
+                        Chưa có tài nguyên nào cho khóa học này.
+                      </Alert>
+                    ) : (
+                      <Grid container spacing={2}>
+                        {resources.map((resource) => (
+                          <Grid item xs={12} sm={6} md={4} key={resource._id}>
+                            <Card>
+                              <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                  <Description color="primary" />
+                                  <Typography variant="h6" noWrap sx={{ fontWeight: 600, flexGrow: 1 }}>
+                                    {resource.name}
+                                  </Typography>
+                                </Box>
+                                <Chip
+                                  label={resource.type.toUpperCase()}
+                                  size="small"
+                                  color="primary"
+                                  sx={{ mb: 1 }}
+                                />
+                                {resource.description && (
+                                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                    {resource.description}
+                                  </Typography>
+                                )}
+                                <Divider sx={{ my: 1 }} />
+                                <Typography variant="caption" color="text.secondary" display="block">
+                                  📦 Kích thước: {(resource.fileSize / 1024 / 1024).toFixed(2)} MB
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" display="block">
+                                  📥 Tải xuống: {resource.downloadCount} lần
+                                </Typography>
+                                {resource.uploadedBy && (
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    👤 Đăng bởi: {resource.uploadedBy.name}
+                                  </Typography>
+                                )}
+                              </CardContent>
+                              <Divider />
+                              <Box sx={{ p: 1, display: 'flex', gap: 1 }}>
+                                <Button
+                                  size="small"
+                                  variant="contained"
+                                  href={resource.fileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  fullWidth
+                                  onClick={async () => {
+                                    try {
+                                      const token = localStorage.getItem('token');
+                                      await axios.put(
+                                        `/api/resources/${resource._id}/download`,
+                                        {},
+                                        { headers: { Authorization: `Bearer ${token}` } }
+                                      );
+                                    } catch (err) {
+                                      console.error('Error updating download count:', err);
+                                    }
+                                  }}
+                                >
+                                  📥 Tải xuống
+                                </Button>
+                              </Box>
+                            </Card>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    )}
                   </Box>
                 )}
                 
