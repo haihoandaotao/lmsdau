@@ -68,7 +68,10 @@ exports.login = async (req, res) => {
     }
 
     // Check for user
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email })
+      .select('+password')
+      .populate('major', 'code name fullName faculty')
+      .populate('curriculum', 'code name effectiveYear');
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -102,7 +105,11 @@ exports.login = async (req, res) => {
         studentId: user.studentId,
         teacherId: user.teacherId,
         department: user.department,
-        avatar: user.avatar
+        avatar: user.avatar,
+        major: user.major,
+        curriculum: user.curriculum,
+        admissionYear: user.admissionYear,
+        studentClass: user.studentClass
       },
       token
     });
@@ -121,7 +128,9 @@ exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
       .populate('enrolledCourses', 'title description')
-      .populate('teachingCourses', 'title description');
+      .populate('teachingCourses', 'title description')
+      .populate('major', 'code name fullName faculty')
+      .populate('curriculum', 'code name effectiveYear');
 
     res.status(200).json({
       success: true,

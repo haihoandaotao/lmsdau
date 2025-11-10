@@ -10,13 +10,16 @@ const {
   unenrollCourse,
   addMaterial,
   updateCourseSettings,
-  getCourseSettings
+  getCourseSettings,
+  getEnrolledCourses
 } = require('../controllers/courseController');
 const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
   .get(getCourses)
   .post(protect, authorize('teacher', 'admin'), createCourse);
+
+router.get('/enrolled', protect, getEnrolledCourses);
 
 router.route('/:id')
   .get(getCourse)

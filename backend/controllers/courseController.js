@@ -20,6 +20,7 @@ exports.getCourses = async (req, res) => {
     const courses = await Course.find(query)
       .populate('instructor', 'name email')
       .populate('enrolledStudents', 'name email studentId')
+      .populate('major', 'code name')
       .sort('-createdAt');
 
     res.status(200).json({
@@ -43,7 +44,8 @@ exports.getCourse = async (req, res) => {
     const course = await Course.findById(req.params.id)
       .populate('instructor', 'name email department')
       .populate('enrolledStudents', 'name email studentId')
-      .populate('prerequisites', 'title code');
+      .populate('prerequisites', 'title code')
+      .populate('major', 'code name fullName faculty');
 
     if (!course) {
       return res.status(404).json({
@@ -389,6 +391,41 @@ exports.getCourseSettings = async (req, res) => {
     });
   } catch (error) {
     console.error('Get course settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Get enrolled courses for current user
+// @route   GET /api/courses/enrolled
+// @access  Private/Student
+exports.getEnrolledCourses = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+      .populate({
+        path: 'enrolledCourses',
+        populate: [
+          { path: 'instructor', select: 'name email' },
+          { path: 'major', select: 'code name' }
+        ]
+      });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: user.enrolledCourses.length,
+      data: user.enrolledCourses
+    });
+  } catch (error) {
+    console.error('Get enrolled courses error:', error);
     res.status(500).json({
       success: false,
       message: error.message
