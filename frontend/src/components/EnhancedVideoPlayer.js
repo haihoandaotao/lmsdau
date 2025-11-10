@@ -38,9 +38,11 @@ import {
   Note,
   PictureInPicture,
   Speed,
-  HighQuality
+  HighQuality,
+  AccessTime
 } from '@mui/icons-material';
 import axios from 'axios';
+import 'video.js/dist/video-js.css';
 
 const EnhancedVideoPlayer = ({ 
   videoUrl, 
@@ -70,7 +72,88 @@ const EnhancedVideoPlayer = ({
 
   useEffect(() => {
     loadUserData();
-  }, [itemId]);
+    initializePlayer();
+    
+    return () => {
+      if (player) {
+        player.dispose();
+      }
+    };
+  }, [itemId, videoUrl]);
+
+  const initializePlayer = async () => {
+    if (!videoRef.current) return;
+
+    // Dynamically import video.js
+    const videojs = (await import('video.js')).default;
+    await import('videojs-youtube');
+
+    const videoElement = videoRef.current;
+    
+    // Initialize player
+    const playerInstance = videojs(videoElement, {
+      controls: true,
+      autoplay: false,
+      preload: 'auto',
+      fluid: true,
+      techOrder: ['youtube'],
+      sources: [{
+        src: videoUrl,
+        type: 'video/youtube'
+      }],
+      youtube: {
+        ytControls: 2,
+        modestbranding: 1
+      }
+    });
+
+    playerInstance.ready(() => {
+      console.log('Video player ready!');
+      setPlayer(playerInstance);
+      setDuration(playerInstance.duration());
+      
+      if (startTime > 0) {
+        playerInstance.currentTime(startTime);
+      }
+    });
+
+    // Event listeners
+    playerInstance.on('play', () => setIsPlaying(true));
+    playerInstance.on('pause', () => setIsPlaying(false));
+    
+    playerInstance.on('timeupdate', () => {
+      setCurrentTime(playerInstance.currentTime());
+    });
+    
+    playerInstance.on('loadedmetadata', () => {
+      setDuration(playerInstance.duration());
+    });
+
+    // Progress tracking every 5 seconds
+    playerInstance.on('timeupdate', async () => {
+      const current = playerInstance.currentTime();
+      const total = playerInstance.duration();
+      
+      if (current && total && current % 5 < 0.5) {
+        try {
+          const token = localStorage.getItem('token');
+          await axios.post('/api/video-progress/update', {
+            itemId,
+            currentTime: current,
+            totalDuration: total
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (onProgress) {
+            onProgress({ currentTime: current, totalDuration: total });
+          }
+        } catch (err) {
+          console.log('Progress tracking error (non-critical)');
+        }
+      }
+    });
+  };
 
   const loadUserData = async () => {
     try {
@@ -193,142 +276,64 @@ const EnhancedVideoPlayer = ({
       <Paper 
         elevation={3} 
         sx={{ 
-          position: 'relative', 
-          paddingTop: '56.25%', // 16:9 aspect ratio
           bgcolor: '#000',
           borderRadius: 2,
-          overflow: 'hidden'
+          overflow: 'hidden',
+          mb: 2
         }}
       >
-        <Box
-          ref={playerRef}
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%'
-          }}
-        >
-          <div data-vjs-player>
-            <video
-              ref={videoRef}
-              className="video-js vjs-big-play-centered vjs-16-9"
-              style={{ width: '100%', height: '100%' }}
-            />
-          </div>
-        </Box>
+        <div data-vjs-player style={{ width: '100%' }}>
+          <video
+            ref={videoRef}
+            className="video-js vjs-big-play-centered vjs-16-9"
+            style={{ width: '100%', height: 'auto' }}
+          />
+        </div>
+      </Paper>
 
-        {/* Custom Controls Overlay */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
-            padding: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1
-          }}
-        >
-          {/* Progress Bar */}
-          <Slider
-            value={currentTime}
-            max={duration}
-            onChange={handleSeek}
-            sx={{
-              color: '#f50057',
-              '& .MuiSlider-thumb': {
-                width: 16,
-                height: 16,
-                '&:hover': { boxShadow: '0 0 0 8px rgba(245, 0, 87, 0.16)' }
-              }
-            }}
+      {/* Quick Actions Bar */}
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Tooltip title="Add Bookmark at current time">
+            <Button 
+              variant="outlined" 
+              startIcon={<Bookmark />}
+              onClick={handleAddBookmark}
+              sx={{ borderColor: '#ffd700', color: '#ffd700' }}
+            >
+              Bookmark
+            </Button>
+          </Tooltip>
+
+          <FormControl size="small" sx={{ minWidth: 100 }}>
+            <Select
+              value={playbackRate}
+              onChange={handlePlaybackRateChange}
+              startAdornment={<Speed sx={{ mr: 1, fontSize: 20 }} />}
+            >
+              <MenuItem value={0.5}>0.5x</MenuItem>
+              <MenuItem value={0.75}>0.75x</MenuItem>
+              <MenuItem value={1}>Normal</MenuItem>
+              <MenuItem value={1.25}>1.25x</MenuItem>
+              <MenuItem value={1.5}>1.5x</MenuItem>
+              <MenuItem value={2}>2x</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Chip 
+            icon={<AccessTime />}
+            label={`${formatTime(currentTime)} / ${formatTime(duration)}`}
+            color="primary"
+            variant="outlined"
           />
 
-          {/* Control Buttons */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'white' }}>
-            {/* Play/Pause */}
-            <IconButton onClick={handlePlayPause} sx={{ color: 'white' }}>
-              {isPlaying ? <Pause /> : <PlayArrow />}
+          <Box sx={{ flexGrow: 1 }} />
+
+          <Tooltip title="Picture-in-Picture">
+            <IconButton onClick={handlePictureInPicture} color="primary">
+              <PictureInPicture />
             </IconButton>
-
-            {/* Volume */}
-            <IconButton 
-              onClick={() => handleVolumeChange(null, volume === 0 ? 100 : 0)} 
-              sx={{ color: 'white' }}
-            >
-              {volume === 0 ? <VolumeOff /> : <VolumeUp />}
-            </IconButton>
-            <Box sx={{ width: 100 }}>
-              <Slider
-                value={volume}
-                onChange={handleVolumeChange}
-                sx={{ color: 'white' }}
-              />
-            </Box>
-
-            {/* Time */}
-            <Typography variant="body2" sx={{ minWidth: 100 }}>
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </Typography>
-
-            <Box sx={{ flexGrow: 1 }} />
-
-            {/* Bookmark Button */}
-            <Tooltip title="Add Bookmark">
-              <IconButton onClick={handleAddBookmark} sx={{ color: '#ffd700' }}>
-                <Bookmark />
-              </IconButton>
-            </Tooltip>
-
-            {/* Speed Control */}
-            <FormControl size="small" sx={{ minWidth: 80 }}>
-              <Select
-                value={playbackRate}
-                onChange={handlePlaybackRateChange}
-                sx={{ color: 'white', '.MuiOutlinedInput-notchedOutline': { border: 0 } }}
-              >
-                <MenuItem value={0.5}>0.5x</MenuItem>
-                <MenuItem value={0.75}>0.75x</MenuItem>
-                <MenuItem value={1}>Normal</MenuItem>
-                <MenuItem value={1.25}>1.25x</MenuItem>
-                <MenuItem value={1.5}>1.5x</MenuItem>
-                <MenuItem value={2}>2x</MenuItem>
-              </Select>
-            </FormControl>
-
-            {/* Quality */}
-            <Tooltip title="Quality">
-              <IconButton sx={{ color: 'white' }}>
-                <HighQuality />
-              </IconButton>
-            </Tooltip>
-
-            {/* Captions */}
-            <Tooltip title="Subtitles">
-              <IconButton 
-                onClick={() => setShowCaptions(!showCaptions)}
-                sx={{ color: showCaptions ? '#f50057' : 'white' }}
-              >
-                <ClosedCaption />
-              </IconButton>
-            </Tooltip>
-
-            {/* Picture-in-Picture */}
-            <Tooltip title="Picture in Picture">
-              <IconButton onClick={handlePictureInPicture} sx={{ color: 'white' }}>
-                <PictureInPicture />
-              </IconButton>
-            </Tooltip>
-
-            {/* Fullscreen */}
-            <IconButton sx={{ color: 'white' }}>
-              <Fullscreen />
-            </IconButton>
-          </Box>
+          </Tooltip>
         </Box>
       </Paper>
 
