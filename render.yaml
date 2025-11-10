@@ -1,18 +1,36 @@
 services:
+  # Backend Service
   - type: web
-    name: lms-api
+    name: lms-dau-backend
     env: node
-    buildCommand: npm install && cd frontend && npm install && npm run build && cd ..
+    region: singapore
+    rootDir: backend
+    buildCommand: npm install
     startCommand: npm start
     autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000
+        value: 5000
       - key: MONGODB_URI
         value: mongodb+srv://lms_admin:lmsdau123@cluster0.baofaov.mongodb.net/lms_database?retryWrites=true&w=majority
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRE
-        value: 30d
+        value: 7d
+      - key: CLIENT_URL
+        sync: false
+
+  # Frontend Service  
+  - type: web
+    name: lms-dau-frontend
+    env: static
+    region: singapore
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    autoDeploy: true
+    envVars:
+      - key: REACT_APP_API_URL
+        sync: false
