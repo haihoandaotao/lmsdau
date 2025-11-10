@@ -183,9 +183,20 @@ const CourseViewer = () => {
             />
             
             {currentItem.description && (
-              <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                <Typography variant="body1">
+              <Box sx={{ mt: 3, p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                  📝 Về video này
+                </Typography>
+                <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
                   {currentItem.description}
+                </Typography>
+              </Box>
+            )}
+            
+            {currentItem.videoDuration && (
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'primary.50', borderRadius: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  ⏱️ Thời lượng: {Math.floor(currentItem.videoDuration / 60)} phút {currentItem.videoDuration % 60} giây
                 </Typography>
               </Box>
             )}
@@ -194,14 +205,70 @@ const CourseViewer = () => {
       
       case 'reading':
         return (
-          <Box sx={{ p: 2 }}>
-            <Typography variant="h5" gutterBottom>
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
               {currentItem.title}
             </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-              {currentItem.content}
-            </Typography>
+            {currentItem.description && (
+              <Typography variant="body1" color="text.secondary" paragraph>
+                {currentItem.description}
+              </Typography>
+            )}
+            <Divider sx={{ my: 3 }} />
+            <Box 
+              sx={{ 
+                '& h1, & h2, & h3, & h4, & h5, & h6': {
+                  fontFamily: 'inherit',
+                  marginTop: '1.5em',
+                  marginBottom: '0.5em'
+                },
+                '& p': {
+                  marginBottom: '1em',
+                  lineHeight: 1.8
+                },
+                '& ul, & ol': {
+                  marginBottom: '1em',
+                  paddingLeft: '2em'
+                },
+                '& li': {
+                  marginBottom: '0.5em'
+                },
+                '& pre': {
+                  backgroundColor: '#2c3e50',
+                  color: '#ecf0f1',
+                  padding: '1em',
+                  borderRadius: '5px',
+                  overflow: 'auto',
+                  marginBottom: '1em'
+                },
+                '& code': {
+                  fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+                  fontSize: '0.9em'
+                },
+                '& table': {
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  marginBottom: '1em'
+                },
+                '& th, & td': {
+                  padding: '0.75em',
+                  border: '1px solid #ddd',
+                  textAlign: 'left'
+                },
+                '& img': {
+                  maxWidth: '100%',
+                  height: 'auto'
+                }
+              }}
+              dangerouslySetInnerHTML={{ __html: currentItem.content }}
+            />
+            {currentItem.readingTime && (
+              <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  ⏱️ Thời gian đọc: khoảng {currentItem.readingTime} phút
+                </Typography>
+              </Box>
+            )}
           </Box>
         );
       
