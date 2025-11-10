@@ -27,6 +27,8 @@ const videoProgressRoutes = require('./routes/videoProgress');
 const gradeRoutes = require('./routes/grades');
 const submissionRoutes = require('./routes/submissions');
 const quizRoutes = require('./routes/quizzes');
+const bookmarkRoutes = require('./routes/bookmarks');
+const noteRoutes = require('./routes/notes');
 
 // Initialize express app
 const app = express();
@@ -89,6 +91,8 @@ app.use('/api/video-progress', videoProgressRoutes);
 app.use('/api/grades', gradeRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/quizzes', quizRoutes);
+app.use('/api/bookmarks', bookmarkRoutes);
+app.use('/api/notes', noteRoutes);
 
 // Serve static files from React app in production
 if (process.env.NODE_ENV === 'production') {

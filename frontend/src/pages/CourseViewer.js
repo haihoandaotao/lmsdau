@@ -39,6 +39,8 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import VideoPlayer from '../components/VideoPlayer';
+import EnhancedVideoPlayer from '../components/EnhancedVideoPlayer';
+import ProgressDashboard from '../components/ProgressDashboard';
 
 const CourseViewer = () => {
   const { courseId } = useParams();
@@ -177,7 +179,7 @@ const CourseViewer = () => {
             {!currentItem.videoUrl ? (
               <Alert severity="warning">Video URL không tồn tại</Alert>
             ) : (
-              <VideoPlayer
+              <EnhancedVideoPlayer
                 videoUrl={currentItem.videoUrl}
                 itemId={currentItem._id}
                 courseId={courseId}
@@ -477,6 +479,7 @@ const CourseViewer = () => {
               <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)} sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
                 <Tab label="Nội dung" />
                 <Tab label="Tổng quan" />
+                <Tab label="📊 Progress" />
                 <Tab label="Tài nguyên" />
                 <Tab label="Thảo luận" />
               </Tabs>
@@ -510,6 +513,10 @@ const CourseViewer = () => {
                 )}
                 
                 {tabValue === 2 && (
+                  <ProgressDashboard courseId={courseId} />
+                )}
+                
+                {tabValue === 3 && (
                   <Box>
                     <Typography variant="h6" gutterBottom>Tài nguyên</Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -518,7 +525,7 @@ const CourseViewer = () => {
                   </Box>
                 )}
                 
-                {tabValue === 3 && (
+                {tabValue === 4 && (
                   <Box>
                     <Typography variant="h6" gutterBottom>Thảo luận</Typography>
                     <Typography variant="body2" color="text.secondary">
