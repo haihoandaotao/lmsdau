@@ -10,7 +10,7 @@ import {
   NavigateBefore as PrevIcon, NavigateNext as NextIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../contexts/AuthContext';
 
 function QuizTaker() {
   const navigate = useNavigate();

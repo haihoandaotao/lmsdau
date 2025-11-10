@@ -6,8 +6,8 @@ const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from backend/.env
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Debug: Check if env is loaded
 console.log('📝 MONGODB_URI:', process.env.MONGODB_URI ? 'Found (Atlas)' : 'NOT FOUND');

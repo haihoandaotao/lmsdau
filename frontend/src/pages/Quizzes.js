@@ -9,7 +9,7 @@ import {
   Timer as TimerIcon, Quiz as QuizIcon, CheckCircle as PassIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../contexts/AuthContext';
 
 function Quizzes() {
   const navigate = useNavigate();
