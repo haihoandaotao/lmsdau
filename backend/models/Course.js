@@ -21,6 +21,11 @@ const courseSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  major: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Major',
+    // Ngành đào tạo
+  },
   department: {
     type: String,
     required: true
@@ -28,16 +33,35 @@ const courseSchema = new mongoose.Schema({
   semester: {
     type: String,
     required: true
+    // Học kỳ: "1", "2", "Hè"
   },
   year: {
     type: Number,
     required: true
+    // Năm học: 2024, 2025, etc.
+  },
+  academicYear: {
+    type: Number,
+    min: 1,
+    max: 6,
+    // Năm thứ mấy trong chương trình (Năm 1, 2, 3, 4)
   },
   credits: {
     type: Number,
     required: true,
     min: 1,
     max: 10
+    // Số tín chỉ
+  },
+  courseType: {
+    type: String,
+    enum: ['Bắt buộc', 'Tự chọn', 'Tiên quyết'],
+    default: 'Bắt buộc'
+  },
+  category: {
+    type: String,
+    enum: ['Đại cương', 'Cơ sở ngành', 'Chuyên ngành', 'Tự chọn', 'Khóa luận'],
+    default: 'Chuyên ngành'
   },
   capacity: {
     type: Number,

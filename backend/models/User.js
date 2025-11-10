@@ -39,6 +39,24 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  major: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Major',
+    // Ngành đào tạo (cho sinh viên)
+  },
+  curriculum: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Curriculum',
+    // Khung chương trình đang theo học
+  },
+  admissionYear: {
+    type: Number,
+    // Năm nhập học (2020, 2021, 2022, etc.)
+  },
+  studentClass: {
+    type: String,
+    // Lớp: CNTT01, CNTT02, etc.
+  },
   avatar: {
     type: String,
     default: ''

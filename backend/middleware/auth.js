@@ -2,7 +2,7 @@ const User = require('../models/User');
 const { verifyToken } = require('../utils/jwt');
 
 // Protect routes - authentication required
-exports.protect = async (req, res, next) => {
+const protect = async (req, res, next) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -45,7 +45,7 @@ exports.protect = async (req, res, next) => {
 };
 
 // Authorize specific roles
-exports.authorize = (...roles) => {
+const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
@@ -56,3 +56,10 @@ exports.authorize = (...roles) => {
     next();
   };
 };
+
+// Default export for middleware usage
+module.exports = protect;
+
+// Named exports
+module.exports.protect = protect;
+module.exports.authorize = authorize;

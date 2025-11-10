@@ -4,7 +4,7 @@ const auth = require('../middleware/auth');
 const Bookmark = require('../models/Bookmark');
 
 // Get all bookmarks for an item
-router.get('/:itemId', auth, async (req, res) => {
+router.get('/item/:itemId', auth, async (req, res) => {
   try {
     const bookmarks = await Bookmark.find({
       user: req.user.id,
