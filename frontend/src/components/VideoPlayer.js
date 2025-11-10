@@ -39,76 +39,97 @@ const VideoPlayer = ({
   const [quality, setQuality] = useState('auto');
 
   useEffect(() => {
-    if (!videoRef.current || !videoUrl) return;
+    if (!videoRef.current || !videoUrl) {
+      console.log('Missing videoRef or videoUrl');
+      return;
+    }
 
-    // Check if it's a YouTube URL
-    const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
+    // Wait for element to be in DOM
+    const initPlayer = () => {
+      // Check if it's a YouTube URL
+      const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
+      
+      console.log('Initializing player for:', videoUrl, 'YouTube:', isYouTube);
 
-    const options = {
-      autoplay: autoplay,
-      controls: false,
-      responsive: true,
-      fluid: true,
-      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
-      sources: [{
-        src: videoUrl,
-        type: isYouTube ? 'video/youtube' : 'video/mp4'
-      }],
-      techOrder: isYouTube ? ['youtube'] : ['html5'],
-      youtube: isYouTube ? { 
-        ytControls: 0,
-        modestbranding: 1,
-        rel: 0
-      } : undefined
+      const options = {
+        autoplay: autoplay,
+        controls: true, // Enable default controls first
+        responsive: true,
+        fluid: true,
+        playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+        sources: [{
+          src: videoUrl,
+          type: isYouTube ? 'video/youtube' : 'video/mp4'
+        }],
+        techOrder: isYouTube ? ['youtube'] : ['html5'],
+        youtube: isYouTube ? { 
+          ytControls: 2, // Use YouTube controls
+          modestbranding: 1,
+          rel: 0,
+          showinfo: 0
+        } : undefined
+      };
+
+      try {
+        // Initialize Video.js
+        const player = videojs(videoRef.current, options, function onPlayerReady() {
+          console.log('Video player is ready');
+          
+          // Set start time
+          if (startTime > 0) {
+            this.currentTime(startTime);
+          }
+          
+          setDuration(this.duration());
+        });
+
+        playerRef.current = player;
+
+        // Event listeners
+        player.on('play', () => setIsPlaying(true));
+        player.on('pause', () => setIsPlaying(false));
+        
+        player.on('timeupdate', () => {
+          setCurrentTime(player.currentTime());
+        });
+        
+        player.on('durationchange', () => {
+          setDuration(player.duration());
+        });
+        
+        player.on('volumechange', () => {
+          setVolume(player.volume());
+          setIsMuted(player.muted());
+        });
+
+        // Track progress every 5 seconds
+        progressIntervalRef.current = setInterval(() => {
+          if (player && !player.paused()) {
+            updateProgress(player.currentTime(), player.duration());
+          }
+        }, 5000);
+      } catch (error) {
+        console.error('Error initializing player:', error);
+      }
     };
 
-    // Initialize Video.js
-    const player = videojs(videoRef.current, options, function onPlayerReady() {
-      console.log('Video player is ready');
-      
-      // Set start time
-      if (startTime > 0) {
-        this.currentTime(startTime);
-      }
-      
-      setDuration(this.duration());
-    });
-
-    playerRef.current = player;
-
-    // Event listeners
-    player.on('play', () => setIsPlaying(true));
-    player.on('pause', () => setIsPlaying(false));
-    
-    player.on('timeupdate', () => {
-      setCurrentTime(player.currentTime());
-    });
-    
-    player.on('durationchange', () => {
-      setDuration(player.duration());
-    });
-    
-    player.on('volumechange', () => {
-      setVolume(player.volume());
-      setIsMuted(player.muted());
-    });
-
-    // Track progress every 5 seconds
-    progressIntervalRef.current = setInterval(() => {
-      if (player && !player.paused()) {
-        updateProgress(player.currentTime(), player.duration());
-      }
-    }, 5000);
+    // Delay initialization to ensure DOM is ready
+    const timeoutId = setTimeout(initPlayer, 100);
 
     // Cleanup
     return () => {
+      clearTimeout(timeoutId);
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
       if (playerRef.current) {
         // Save progress before unmounting
-        updateProgress(playerRef.current.currentTime(), playerRef.current.duration());
-        playerRef.current.dispose();
+        try {
+          updateProgress(playerRef.current.currentTime(), playerRef.current.duration());
+          playerRef.current.dispose();
+        } catch (e) {
+          console.log('Cleanup error:', e);
+        }
       }
     };
   }, [videoUrl]);
@@ -116,6 +137,7 @@ const VideoPlayer = ({
   // Update progress to backend
   const updateProgress = async (currentTime, totalDuration) => {
     if (!itemId || !courseId || !moduleId) return;
+    if (!currentTime || !totalDuration || isNaN(currentTime) || isNaN(totalDuration)) return;
     
     try {
       const token = localStorage.getItem('token');
@@ -141,7 +163,8 @@ const VideoPlayer = ({
         });
       }
     } catch (error) {
-      console.error('Error updating progress:', error);
+      // Silently fail - don't disrupt video playback
+      console.log('Progress update skipped:', error.response?.status || error.message);
     }
   };
 
@@ -219,119 +242,16 @@ const VideoPlayer = ({
   }
 
   return (
-    <Box sx={{ width: '100%', bgcolor: 'black', position: 'relative', borderRadius: 1, overflow: 'hidden' }}>
+    <Box sx={{ width: '100%', position: 'relative', borderRadius: 1, overflow: 'hidden' }}>
       {/* Video Element */}
-      <div data-vjs-player>
+      <div data-vjs-player style={{ width: '100%' }}>
         <video
           ref={videoRef}
-          className="video-js vjs-big-play-centered"
+          className="video-js vjs-big-play-centered vjs-16-9"
           playsInline
+          style={{ width: '100%', height: 'auto' }}
         />
       </div>
-
-      {/* Custom Controls Overlay */}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          bgcolor: 'rgba(0, 0, 0, 0.7)',
-          p: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1
-        }}
-      >
-        {/* Progress Bar */}
-        <Slider
-          value={currentTime}
-          max={duration || 100}
-          onChange={handleSeek}
-          sx={{
-            color: '#C8102E',
-            height: 4,
-            '& .MuiSlider-thumb': {
-              width: 12,
-              height: 12,
-              '&:hover': {
-                boxShadow: '0 0 0 8px rgba(200, 16, 46, 0.16)'
-              }
-            }
-          }}
-        />
-
-        {/* Controls Row */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Play/Pause */}
-          <Tooltip title={isPlaying ? 'Tạm dừng' : 'Phát'}>
-            <IconButton onClick={handlePlayPause} sx={{ color: 'white' }}>
-              {isPlaying ? <Pause /> : <PlayArrow />}
-            </IconButton>
-          </Tooltip>
-
-          {/* Volume */}
-          <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 120 }}>
-            <Tooltip title={isMuted ? 'Bật tiếng' : 'Tắt tiếng'}>
-              <IconButton onClick={handleMuteToggle} sx={{ color: 'white' }}>
-                {isMuted || volume === 0 ? <VolumeOff /> : <VolumeUp />}
-              </IconButton>
-            </Tooltip>
-            <Slider
-              value={isMuted ? 0 : volume}
-              max={1}
-              step={0.1}
-              onChange={handleVolumeChange}
-              sx={{
-                color: 'white',
-                width: 80,
-                ml: 1
-              }}
-            />
-          </Box>
-
-          {/* Time Display */}
-          <Typography variant="body2" sx={{ color: 'white', minWidth: 100 }}>
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </Typography>
-
-          <Box sx={{ flexGrow: 1 }} />
-
-          {/* Playback Rate */}
-          <FormControl size="small" sx={{ minWidth: 80 }}>
-            <Select
-              value={playbackRate}
-              onChange={handlePlaybackRateChange}
-              sx={{
-                color: 'white',
-                '.MuiOutlinedInput-notchedOutline': { border: 'none' },
-                '.MuiSvgIcon-root': { color: 'white' }
-              }}
-            >
-              <MenuItem value={0.5}>0.5x</MenuItem>
-              <MenuItem value={0.75}>0.75x</MenuItem>
-              <MenuItem value={1}>Bình thường</MenuItem>
-              <MenuItem value={1.25}>1.25x</MenuItem>
-              <MenuItem value={1.5}>1.5x</MenuItem>
-              <MenuItem value={2}>2x</MenuItem>
-            </Select>
-          </FormControl>
-
-          {/* Settings */}
-          <Tooltip title="Cài đặt">
-            <IconButton sx={{ color: 'white' }} onClick={() => setShowSettings(!showSettings)}>
-              <Settings />
-            </IconButton>
-          </Tooltip>
-
-          {/* Fullscreen */}
-          <Tooltip title={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}>
-            <IconButton onClick={handleFullscreen} sx={{ color: 'white' }}>
-              {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
     </Box>
   );
 };
