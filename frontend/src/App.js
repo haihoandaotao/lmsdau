@@ -30,6 +30,7 @@ const QuizBuilder = lazy(() => import('./pages/QuizBuilder'));
 const QuizTaker = lazy(() => import('./pages/QuizTaker'));
 const QuizResults = lazy(() => import('./pages/QuizResults'));
 const Quizzes = lazy(() => import('./pages/Quizzes'));
+const CourseSettings = lazy(() => import('./pages/CourseSettings'));
 const Forum = lazy(() => import('./pages/Forum'));
 const ForumPost = lazy(() => import('./pages/ForumPost'));
 const Progress = lazy(() => import('./pages/Progress'));
@@ -239,6 +240,7 @@ function App() {
                     <Route path="courses" element={<Courses />} />
                     <Route path="courses/:id" element={<CourseDetail />} />
                     <Route path="courses/:courseId/modules" element={<ModuleManagement />} />
+                    <Route path="courses/:courseId/settings" element={<CourseSettings />} />
                     <Route path="courses/:courseId/gradebook" element={<Gradebook />} />
                     <Route path="courses/:courseId/my-grades" element={<StudentGrades />} />
                     <Route path="assignments" element={<Assignments />} />

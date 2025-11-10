@@ -170,22 +170,32 @@ const CourseDetail = () => {
               )}
 
               {(user.role === 'teacher' || user.role === 'admin') && (
-                <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+                <Box sx={{ mt: 2, display: 'flex', gap: 2, flexDirection: 'column' }}>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button 
+                      variant="contained" 
+                      color="primary"
+                      onClick={() => navigate(`/courses/${id}/modules`)}
+                      sx={{ flexGrow: 1 }}
+                    >
+                      Quản lý nội dung
+                    </Button>
+                    <Button 
+                      variant="contained" 
+                      color="secondary"
+                      onClick={() => navigate(`/courses/${id}/gradebook`)}
+                      sx={{ flexGrow: 1 }}
+                    >
+                      Bảng điểm
+                    </Button>
+                  </Box>
                   <Button 
-                    variant="contained" 
+                    variant="outlined" 
                     color="primary"
-                    onClick={() => navigate(`/courses/${id}/modules`)}
-                    sx={{ flexGrow: 1 }}
+                    onClick={() => navigate(`/courses/${id}/settings`)}
+                    fullWidth
                   >
-                    Quản lý nội dung
-                  </Button>
-                  <Button 
-                    variant="contained" 
-                    color="secondary"
-                    onClick={() => navigate(`/courses/${id}/gradebook`)}
-                    sx={{ flexGrow: 1 }}
-                  >
-                    Bảng điểm
+                    Cài đặt khóa học
                   </Button>
                 </Box>
               )}
