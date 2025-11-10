@@ -27,6 +27,8 @@ const Assignments = lazy(() => import('./pages/Assignments'));
 const AssignmentDetail = lazy(() => import('./pages/AssignmentDetail'));
 const AssignmentSubmit = lazy(() => import('./pages/AssignmentSubmit'));
 const SubmissionsList = lazy(() => import('./pages/SubmissionsList'));
+const MajorManagement = lazy(() => import('./pages/MajorManagement'));
+const StudentCurriculum = lazy(() => import('./pages/StudentCurriculum'));
 const QuizBuilder = lazy(() => import('./pages/QuizBuilder'));
 const QuizTaker = lazy(() => import('./pages/QuizTaker'));
 const QuizResults = lazy(() => import('./pages/QuizResults'));
@@ -258,6 +260,8 @@ function App() {
                     <Route path="forum/:id" element={<ForumPost />} />
                     <Route path="progress" element={<Progress />} />
                     <Route path="profile" element={<Profile />} />
+                    <Route path="curriculum" element={<StudentCurriculum />} />
+                    <Route path="admin/majors" element={<MajorManagement />} />
                   </Route>
                 </Routes>
               </Suspense>

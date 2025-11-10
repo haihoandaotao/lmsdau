@@ -124,11 +124,73 @@ const CourseDetail = () => {
     <Container maxWidth="lg">
       <PageHeader
         title={course.title}
-        subtitle={`Mã khóa học: ${course.code}`}
+        subtitle={`Mã học phần: ${course.code}`}
       />
 
       <Grid container spacing={4}>
         <Grid item xs={12} md={8}>
+          {/* Course Info Card */}
+          <Card sx={{ mb: 3, bgcolor: 'primary.light', color: 'primary.contrastText' }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Thông tin học phần
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>Mã học phần</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{course.code}</Typography>
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>Số tín chỉ</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{course.credits || 3} tín chỉ</Typography>
+                </Grid>
+                {course.major && (
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>Ngành đào tạo</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{course.major.name || course.major.code}</Typography>
+                  </Grid>
+                )}
+                {course.academicYear && (
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>Năm học</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Năm {course.academicYear}</Typography>
+                  </Grid>
+                )}
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>Học kỳ</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    {course.semester === 'Summer' ? 'Học kỳ Hè' : `Học kỳ ${course.semester}`}
+                  </Typography>
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>Năm học</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{course.year}</Typography>
+                </Grid>
+                {course.category && (
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>Loại học phần</Typography>
+                    <Chip 
+                      label={course.category} 
+                      size="small" 
+                      sx={{ mt: 0.5, bgcolor: 'white', color: 'primary.main', fontWeight: 'bold' }}
+                    />
+                  </Grid>
+                )}
+                {course.courseType && (
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>Tính chất</Typography>
+                    <Chip 
+                      label={course.courseType} 
+                      size="small"
+                      color={course.courseType === 'Bắt buộc' ? 'error' : 'default'}
+                      sx={{ mt: 0.5, bgcolor: 'white', fontWeight: 'bold' }}
+                    />
+                  </Grid>
+                )}
+              </Grid>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -138,10 +200,9 @@ const CourseDetail = () => {
                 {course.description}
               </Typography>
 
-              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+              <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
                 <Chip icon={<PersonIcon />} label={`GV: ${course.instructor?.name}`} />
-                <Chip icon={<CalendarIcon />} label={`${course.semester} ${course.year}`} />
-                <Chip label={`${course.credits} tín chỉ`} />
+                <Chip icon={<CalendarIcon />} label={`${course.semester === 'Summer' ? 'Hè' : 'HK' + course.semester} ${course.year}`} />
               </Box>
 
               {user.role === 'student' && (

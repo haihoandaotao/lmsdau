@@ -28,6 +28,7 @@ import {
   Forum as ForumIcon,
   TrendingUp as ProgressIcon,
   AccountCircle as ProfileIcon,
+  MenuBook as MenuBookIcon,
   Notifications as NotificationsIcon,
   Logout as LogoutIcon
 } from '@mui/icons-material';
@@ -73,6 +74,7 @@ const Layout = () => {
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { text: 'Chương trình đào tạo', icon: <MenuBookIcon />, path: '/curriculum', roles: ['student'] },
     { text: 'Khóa học', icon: <SchoolIcon />, path: '/courses' },
     { text: 'Bài tập', icon: <AssignmentIcon />, path: '/assignments' },
     { text: 'Diễn đàn', icon: <ForumIcon />, path: '/forum' },
@@ -120,7 +122,9 @@ const Layout = () => {
       </Toolbar>
       <Divider />
       <List sx={{ pt: 2 }}>
-        {menuItems.map((item) => (
+        {menuItems
+          .filter(item => !item.roles || item.roles.includes(user?.role))
+          .map((item) => (
           <ListItem 
             key={item.text} 
             onClick={() => navigate(item.path)} 
