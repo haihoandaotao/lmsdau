@@ -26,6 +26,10 @@ const Assignments = lazy(() => import('./pages/Assignments'));
 const AssignmentDetail = lazy(() => import('./pages/AssignmentDetail'));
 const AssignmentSubmit = lazy(() => import('./pages/AssignmentSubmit'));
 const SubmissionsList = lazy(() => import('./pages/SubmissionsList'));
+const QuizBuilder = lazy(() => import('./pages/QuizBuilder'));
+const QuizTaker = lazy(() => import('./pages/QuizTaker'));
+const QuizResults = lazy(() => import('./pages/QuizResults'));
+const Quizzes = lazy(() => import('./pages/Quizzes'));
 const Forum = lazy(() => import('./pages/Forum'));
 const ForumPost = lazy(() => import('./pages/ForumPost'));
 const Progress = lazy(() => import('./pages/Progress'));
@@ -241,6 +245,11 @@ function App() {
                     <Route path="assignments/:id" element={<AssignmentDetail />} />
                     <Route path="assignments/:assignmentId/submit" element={<AssignmentSubmit />} />
                     <Route path="assignments/:assignmentId/submissions" element={<SubmissionsList />} />
+                    <Route path="courses/:courseId/quizzes" element={<Quizzes />} />
+                    <Route path="quizzes/new" element={<QuizBuilder />} />
+                    <Route path="quizzes/:quizId/edit" element={<QuizBuilder />} />
+                    <Route path="quizzes/:quizId/take" element={<QuizTaker />} />
+                    <Route path="quizzes/attempts/:attemptId" element={<QuizResults />} />
                     <Route path="forum" element={<Forum />} />
                     <Route path="forum/:id" element={<ForumPost />} />
                     <Route path="progress" element={<Progress />} />
