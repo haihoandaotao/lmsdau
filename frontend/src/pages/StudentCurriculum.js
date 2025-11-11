@@ -53,12 +53,16 @@ const StudentCurriculum = () => {
     try {
       setLoading(true);
 
+      // Extract IDs if major/curriculum are objects (populated)
+      const majorId = typeof user.major === 'object' ? user.major._id || user.major.id : user.major;
+      const curriculumId = typeof user.curriculum === 'object' ? user.curriculum._id || user.curriculum.id : user.curriculum;
+
       // Fetch major details
-      const majorRes = await api.get(`/majors/${user.major}`);
+      const majorRes = await api.get(`/majors/${majorId}`);
       setMajor(majorRes.data.data);
 
       // Fetch curriculum details
-      const curriculumRes = await api.get(`/curriculums/${user.curriculum}`);
+      const curriculumRes = await api.get(`/curriculums/${curriculumId}`);
       setCurriculum(curriculumRes.data.data);
 
       // Fetch enrolled courses
