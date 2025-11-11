@@ -1,27 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Grid,
   Paper,
   Typography,
-  Card,
-  CardContent,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Chip,
   LinearProgress,
   Button,
-  Divider,
-  Alert
+  Alert,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
-  School as SchoolIcon,
   CheckCircle as CheckCircleIcon,
   Schedule as ScheduleIcon,
   Lock as LockIcon,
-  MenuBook as MenuBookIcon
+  Visibility as VisibilityIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -35,7 +38,6 @@ const StudentCurriculum = () => {
   const [major, setMajor] = useState(null);
   const [curriculum, setCurriculum] = useState(null);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [completedCourses, setCompletedCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState('year-1');
 
@@ -49,92 +51,90 @@ const StudentCurriculum = () => {
 
   const fetchData = async () => {
     try {
-      const [majorRes, curriculumRes, enrolledRes] = await Promise.all([
-        api.get(`/majors/${user.major}`),
-        api.get(`/curriculums/${user.curriculum}`),
-        api.get('/courses/enrolled')
-      ]);
+      setLoading(true);
 
+      // Fetch major details
+      const majorRes = await api.get(`/majors/${user.major}`);
       setMajor(majorRes.data.data);
+
+      // Fetch curriculum details
+      const curriculumRes = await api.get(`/curriculums/${user.curriculum}`);
       setCurriculum(curriculumRes.data.data);
+
+      // Fetch enrolled courses
+      const enrolledRes = await api.get('/courses/enrolled');
       setEnrolledCourses(enrolledRes.data.data || []);
 
-      // Get completed courses (courses with high progress)
-      const completed = enrolledRes.data.data?.filter(c => c.progress >= 100) || [];
-      setCompletedCourses(completed);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      toast.error('Không thể tải thông tin chương trình đào tạo');
+      console.error('Error fetching curriculum:', error);
+      toast.error('Không thể tải chương trình đào tạo');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAccordionChange = (panel) => (event, isExpanded) => {
-    setExpanded(isExpanded ? panel : false);
-  };
-
   const getCourseStatus = (courseId) => {
-    const enrolled = enrolledCourses.find(c => c._id === courseId || c.course?._id === courseId);
-    if (!enrolled) return { status: 'not-enrolled', label: 'Chưa đăng ký', color: 'default', icon: <LockIcon /> };
-    
-    const progress = enrolled.progress || 0;
-    if (progress >= 100) return { status: 'completed', label: 'Đã hoàn thành', color: 'success', icon: <CheckCircleIcon /> };
-    if (progress > 0) return { status: 'in-progress', label: 'Đang học', color: 'primary', icon: <ScheduleIcon /> };
-    
-    return { status: 'enrolled', label: 'Đã đăng ký', color: 'info', icon: <ScheduleIcon /> };
-  };
-
-  const calculateProgress = () => {
-    if (!curriculum) return 0;
-    
-    const totalCourses = curriculum.structure?.reduce((acc, year) => {
-      return acc + year.courses?.filter(c => c.isRequired).length || 0;
-    }, 0) || 1;
-    
-    const completedRequired = completedCourses.filter(c => {
-      return curriculum.structure?.some(year => 
-        year.courses?.some(courseItem => 
-          (courseItem.course?._id === c._id || courseItem.course === c._id) && courseItem.isRequired
-        )
-      );
-    }).length;
-    
-    return Math.round((completedRequired / totalCourses) * 100);
-  };
-
-  const calculateCredits = () => {
-    if (!curriculum) return { earned: 0, total: curriculum?.totalCredits || 0 };
-    
-    const earnedCredits = completedCourses.reduce((sum, course) => {
-      const credits = course.credits || course.course?.credits || 0;
-      return sum + credits;
-    }, 0);
-    
-    return { earned: earnedCredits, total: curriculum.totalCredits || 0 };
-  };
-
-  const groupBySemester = (courses) => {
-    const grouped = {};
-    courses?.forEach(courseItem => {
-      const semester = courseItem.semester || 1;
-      if (!grouped[semester]) {
-        grouped[semester] = [];
-      }
-      grouped[semester].push(courseItem);
-    });
-    return grouped;
+    const enrolled = enrolledCourses.find(c => c._id === courseId);
+    if (enrolled) {
+      return {
+        status: 'enrolled',
+        label: 'Đã đăng ký',
+        color: 'success',
+        icon: <CheckCircleIcon fontSize="small" />
+      };
+    }
+    return {
+      status: 'not-enrolled',
+      label: 'Chưa đăng ký',
+      color: 'default',
+      icon: <LockIcon fontSize="small" />
+    };
   };
 
   const getCategoryColor = (category) => {
     const colors = {
       'Đại cương': 'primary',
-      'Cơ sở ngành': 'secondary',
-      'Chuyên ngành': 'error',
+      'Cơ sở ngành': 'info',
+      'Chuyên ngành': 'secondary',
       'Tự chọn': 'warning',
-      'Khóa luận': 'success'
+      'Khóa luận': 'error'
     };
     return colors[category] || 'default';
+  };
+
+  const getSemesterName = (semester) => {
+    if (semester === 3) return 'Học kỳ Hè';
+    return `Học kỳ ${semester}`;
+  };
+
+  const calculateProgress = () => {
+    if (!curriculum?.structure || enrolledCourses.length === 0) return 0;
+    
+    const totalCourses = curriculum.structure.reduce((sum, year) => 
+      sum + year.courses.length, 0
+    );
+    
+    return totalCourses > 0 
+      ? Math.round((enrolledCourses.length / totalCourses) * 100)
+      : 0;
+  };
+
+  const calculateCredits = () => {
+    const earned = enrolledCourses.reduce((sum, course) => sum + (course.credits || 0), 0);
+    const total = curriculum?.totalCredits || 0;
+    return { earned, total };
+  };
+
+  const groupBySemester = (courses) => {
+    const grouped = {};
+    courses.forEach(item => {
+      const semester = item.semester || 1;
+      if (!grouped[semester]) {
+        grouped[semester] = [];
+      }
+      grouped[semester].push(item);
+    });
+    return grouped;
   };
 
   if (loading) {
@@ -149,266 +149,241 @@ const StudentCurriculum = () => {
   if (!user?.major || !user?.curriculum) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="info">
+        <Alert severity="warning">
           Bạn chưa được phân công vào ngành đào tạo. Vui lòng liên hệ phòng đào tạo.
         </Alert>
       </Box>
     );
   }
 
+  if (!curriculum) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">
+          Không tìm thấy chương trình đào tạo. Vui lòng liên hệ quản trị viên.
+        </Alert>
+      </Box>
+    );
+  }
+
   const progress = calculateProgress();
-  const credits = calculateCredits();
+  const { earned, total } = calculateCredits();
 
   return (
-    <Box>
+    <Box sx={{ p: 3 }}>
       <PageHeader
         title="Chương trình đào tạo của tôi"
-        subtitle={`${major?.name} - ${user.studentClass || ''}`}
+        subtitle={`${user.name} - ${user.studentClass || 'CNTT01'}`}
       />
 
-      {/* Major Info Card */}
-      <Card sx={{ mb: 3, bgcolor: 'primary.main', color: 'white' }}>
-        <CardContent>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={3}>
-              <Box sx={{ textAlign: 'center' }}>
-                <SchoolIcon sx={{ fontSize: 60, mb: 1 }} />
-                <Typography variant="h6">{major?.code}</Typography>
-                <Typography variant="body2">{major?.name}</Typography>
+      {/* Header Info Card */}
+      <Paper sx={{ p: 3, mb: 3, bgcolor: 'primary.light', color: 'white' }}>
+        <Typography variant="h6" gutterBottom>
+          {major?.name || 'undefined'}
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2, opacity: 0.9 }}>
+          {curriculum?.name} - Khóa {user.admissionYear || 2024}
+        </Typography>
+        
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 1 }}>
+          <Typography variant="body2">
+            Tiến độ: {progress}%
+          </Typography>
+          <Typography variant="body2">
+            Tín chỉ: {earned} / {total} TC
+          </Typography>
+        </Box>
+        <LinearProgress 
+          variant="determinate" 
+          value={progress} 
+          sx={{ 
+            height: 8, 
+            borderRadius: 1,
+            bgcolor: 'rgba(255,255,255,0.3)',
+            '& .MuiLinearProgress-bar': {
+              bgcolor: 'white'
+            }
+          }} 
+        />
+      </Paper>
+
+      {/* Curriculum by Year */}
+      {curriculum?.structure?.map((yearData, index) => {
+        const yearNumber = yearData.year || (index + 1);
+        const semesterGroups = groupBySemester(yearData.courses || []);
+        
+        return (
+          <Accordion
+            key={yearNumber}
+            expanded={expanded === `year-${yearNumber}`}
+            onChange={() => setExpanded(expanded === `year-${yearNumber}` ? '' : `year-${yearNumber}`)}
+            sx={{ mb: 2 }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                <Typography variant="h6">
+                  Năm {yearNumber}
+                </Typography>
+                <Chip 
+                  label={`${yearData.courses?.length || 0} môn học`} 
+                  size="small" 
+                  color="primary"
+                />
               </Box>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>Khung chương trình</Typography>
-              <Typography variant="h6">{curriculum?.name}</Typography>
-              <Typography variant="body2">Niên khóa {curriculum?.effectiveYear}</Typography>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>Tín chỉ tích lũy</Typography>
-              <Typography variant="h6">{credits.earned} / {credits.total} TC</Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={(credits.earned / credits.total) * 100} 
-                sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.3)', '& .MuiLinearProgress-bar': { bgcolor: 'white' } }}
-              />
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>Tiến độ hoàn thành</Typography>
-              <Typography variant="h6">{progress}%</Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={progress} 
-                sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.3)', '& .MuiLinearProgress-bar': { bgcolor: 'white' } }}
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      {/* Curriculum Structure by Year */}
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <MenuBookIcon /> Các học phần theo năm học
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-
-            {curriculum?.structure?.map((yearData, yearIndex) => {
-              const semesterGroups = groupBySemester(yearData.courses);
-              
-              return (
-                <Accordion 
-                  key={yearIndex}
-                  expanded={expanded === `year-${yearData.year}`}
-                  onChange={handleAccordionChange(`year-${yearData.year}`)}
-                  sx={{ mb: 1 }}
-                >
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                        Năm {yearData.year}
-                      </Typography>
-                      <Chip 
-                        label={`${yearData.courses?.length || 0} học phần`} 
-                        size="small" 
-                        color="primary"
-                      />
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {Object.keys(semesterGroups).sort().map((semester) => (
-                      <Box key={semester} sx={{ mb: 3 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, color: 'primary.main' }}>
-                          {semester === 'Summer' ? 'Học kỳ Hè' : `Học kỳ ${semester}`}
-                        </Typography>
-                        
-                        <Grid container spacing={2}>
-                          {semesterGroups[semester].map((courseItem, idx) => {
-                            const course = courseItem.course;
-                            if (!course || typeof course === 'string') return null;
+            </AccordionSummary>
+            
+            <AccordionDetails>
+              {Object.entries(semesterGroups)
+                .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                .map(([semester, courses]) => (
+                  <Box key={semester} sx={{ mb: 3 }}>
+                    <Typography 
+                      variant="subtitle1" 
+                      sx={{ 
+                        mb: 2, 
+                        fontWeight: 600,
+                        color: 'primary.main',
+                        borderBottom: 2,
+                        borderColor: 'primary.main',
+                        pb: 1
+                      }}
+                    >
+                      {getSemesterName(parseInt(semester))}
+                    </Typography>
+                    
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell sx={{ fontWeight: 600, width: '10%' }}>Mã HP</TableCell>
+                            <TableCell sx={{ fontWeight: 600, width: '35%' }}>Tên học phần</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 600, width: '10%' }}>Số TC</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 600, width: '15%' }}>Loại HP</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 600, width: '15%' }}>Tính chất</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 600, width: '15%' }}>Trạng thái</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {courses.map((item) => {
+                            const course = item.course;
+                            if (!course) return null;
                             
                             const status = getCourseStatus(course._id);
                             
                             return (
-                              <Grid item xs={12} key={idx}>
-                                <Card 
-                                  sx={{ 
-                                    border: 1, 
-                                    borderColor: status.status === 'completed' ? 'success.main' : 'divider',
-                                    bgcolor: status.status === 'completed' ? 'success.light' : 'background.paper',
-                                    '&:hover': { boxShadow: 3 },
-                                    cursor: 'pointer'
-                                  }}
-                                  onClick={() => navigate(`/courses/${course._id}`)}
-                                >
-                                  <CardContent>
-                                    <Grid container spacing={2} alignItems="center">
-                                      <Grid item xs={12} md={6}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                            {course.code}
-                                          </Typography>
-                                          {courseItem.isRequired && (
-                                            <Chip label="Bắt buộc" size="small" color="error" />
-                                          )}
-                                        </Box>
-                                        <Typography variant="body1">{course.title}</Typography>
-                                      </Grid>
-                                      
-                                      <Grid item xs={12} md={3}>
-                                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                                          <Chip 
-                                            label={`${course.credits || 3} TC`} 
-                                            size="small" 
-                                            variant="outlined"
-                                          />
-                                          {course.category && (
-                                            <Chip 
-                                              label={course.category} 
-                                              size="small" 
-                                              color={getCategoryColor(course.category)}
-                                              variant="outlined"
-                                            />
-                                          )}
-                                        </Box>
-                                      </Grid>
-                                      
-                                      <Grid item xs={12} md={3} sx={{ textAlign: 'right' }}>
-                                        <Chip 
-                                          icon={status.icon}
-                                          label={status.label}
-                                          color={status.color}
-                                          size="small"
-                                        />
-                                        {status.status === 'not-enrolled' && (
-                                          <Button 
-                                            size="small" 
-                                            variant="contained" 
-                                            sx={{ mt: 1, display: 'block', ml: 'auto' }}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              navigate(`/courses/${course._id}`);
-                                            }}
-                                          >
-                                            Đăng ký
-                                          </Button>
-                                        )}
-                                        {status.status === 'in-progress' && (
-                                          <Button 
-                                            size="small" 
-                                            variant="contained" 
-                                            color="primary"
-                                            sx={{ mt: 1, display: 'block', ml: 'auto' }}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              navigate(`/courses/${course._id}/learn`);
-                                            }}
-                                          >
-                                            Tiếp tục học
-                                          </Button>
-                                        )}
-                                      </Grid>
-                                    </Grid>
-                                  </CardContent>
-                                </Card>
-                              </Grid>
+                              <TableRow 
+                                key={course._id}
+                                hover
+                                sx={{ 
+                                  cursor: 'pointer',
+                                  '&:hover': { bgcolor: 'action.hover' }
+                                }}
+                              >
+                                <TableCell>
+                                  <Typography variant="body2" fontWeight={600}>
+                                    {course.courseCode || 'N/A'}
+                                  </Typography>
+                                </TableCell>
+                                
+                                <TableCell>
+                                  <Typography variant="body2">
+                                    {course.title}
+                                  </Typography>
+                                </TableCell>
+                                
+                                <TableCell align="center">
+                                  <Chip 
+                                    label={`${course.credits || 0} TC`}
+                                    size="small"
+                                    color="default"
+                                    variant="outlined"
+                                  />
+                                </TableCell>
+                                
+                                <TableCell align="center">
+                                  <Chip 
+                                    label={course.category || 'Chưa phân loại'}
+                                    size="small"
+                                    color={getCategoryColor(course.category)}
+                                    variant="outlined"
+                                  />
+                                </TableCell>
+                                
+                                <TableCell align="center">
+                                  <Chip 
+                                    label={course.courseType || item.isRequired ? 'Bắt buộc' : 'Tự chọn'}
+                                    size="small"
+                                    color={item.isRequired ? 'error' : 'default'}
+                                    variant="outlined"
+                                  />
+                                </TableCell>
+                                
+                                <TableCell align="center">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                    <Chip 
+                                      icon={status.icon}
+                                      label={status.label}
+                                      size="small"
+                                      color={status.color}
+                                      variant={status.status === 'enrolled' ? 'filled' : 'outlined'}
+                                    />
+                                    <Tooltip title="Xem chi tiết">
+                                      <IconButton 
+                                        size="small"
+                                        onClick={() => navigate(`/courses/${course._id}`)}
+                                      >
+                                        <VisibilityIcon fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </Box>
+                                </TableCell>
+                              </TableRow>
                             );
                           })}
-                        </Grid>
-                      </Box>
-                    ))}
-                  </AccordionDetails>
-                </Accordion>
-              );
-            })}
-          </Paper>
-        </Grid>
-
-        {/* Categories Summary */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>Tín chỉ theo nhóm kiến thức</Typography>
-            <Divider sx={{ mb: 2 }} />
-            
-            {curriculum?.categories && Object.keys(curriculum.categories).map((key) => {
-              const category = curriculum.categories[key];
-              if (!category || !category.credits) return null;
-              
-              const categoryNames = {
-                generalEducation: 'Giáo dục đại cương',
-                foundational: 'Cơ sở ngành',
-                specialized: 'Chuyên ngành',
-                elective: 'Tự chọn',
-                thesis: 'Khóa luận tốt nghiệp'
-              };
-              
-              return (
-                <Box key={key} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography variant="body2">{categoryNames[key]}</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                      {category.credits} TC
-                    </Typography>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
                   </Box>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={50} 
-                    color={getCategoryColor(categoryNames[key])}
-                  />
-                </Box>
-              );
-            })}
-          </Paper>
-        </Grid>
+                ))}
+            </AccordionDetails>
+          </Accordion>
+        );
+      })}
 
-        {/* Major Info */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>Thông tin ngành</Typography>
-            <Divider sx={{ mb: 2 }} />
+      {/* Summary Statistics */}
+      <Paper sx={{ p: 3, mt: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Tổng kết chương trình
+        </Typography>
+        
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2, mt: 2 }}>
+          {curriculum?.categories && Object.entries(curriculum.categories).map(([key, data]) => {
+            if (!data || data.credits === 0) return null;
             
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Tên đầy đủ</Typography>
-              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{major?.fullName}</Typography>
-            </Box>
+            const labels = {
+              generalEducation: 'Đại cương',
+              foundational: 'Cơ sở ngành',
+              specialized: 'Chuyên ngành',
+              elective: 'Tự chọn',
+              thesis: 'Khóa luận'
+            };
             
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Khoa</Typography>
-              <Typography variant="body1">{major?.faculty}</Typography>
-            </Box>
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Trình độ đào tạo</Typography>
-              <Typography variant="body1">{major?.trainingLevel}</Typography>
-            </Box>
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Thời gian đào tạo</Typography>
-              <Typography variant="body1">{major?.duration} năm</Typography>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+            return (
+              <Box key={key} sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {labels[key]}
+                </Typography>
+                <Typography variant="h6">
+                  {data.credits} tín chỉ
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {data.courses?.length || 0} môn học
+                </Typography>
+              </Box>
+            );
+          })}
+        </Box>
+      </Paper>
     </Box>
   );
 };
